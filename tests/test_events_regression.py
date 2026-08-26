@@ -63,6 +63,9 @@ def test_divergent_frame_during_pending_no_crash():
     r = tr.process(_e(0.11, 47, "B2"))
     assert r is not None
     assert r.note == "A2"
+    # Extra B2 frame provides sustained evidence so the promoted B2
+    # satisfies min_note_duration_s before finalize().
+    tr.process(_e(0.14, 47, "B2"))
     fin = tr.finalize()
     assert fin[0].note == "B2"
 

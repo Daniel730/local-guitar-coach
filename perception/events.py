@@ -167,6 +167,11 @@ class EventTracker:
             if pend is not None and midi == pend["midi"]:
                 pend_age = t - pend["since"]
                 if pend_age >= self.stabilization_s:
+                    # The commit instant is the authority for closing the OPEN note:
+                    # its effective end is NOW (the transition was just determined),
+                    # not the stale last frame. Set last to t so _close() sees the
+                    # real duration (last - start) instead of duration 0.
+                    self._open["last"] = t
                     # Snapshot pending BEFORE _close() (which sets _open=None).
                     pend_since = pend["since"]
                     closed = self._close(t)

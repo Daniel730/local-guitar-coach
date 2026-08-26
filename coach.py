@@ -95,7 +95,7 @@ def run_session(args) -> int:
 
     def _cb(indata, frames, time_info, status):
         nonlocal blocks, max_peak
-        block = indata[:, 0] if indata.shape[1] > 1 else indata.ravel()
+        block = indata[:, args.channel] if indata.shape[1] > 1 else indata.ravel()
         blocks += 1
         pk = float(np.max(np.abs(block)))
         max_peak = max(max_peak, pk)
@@ -244,6 +244,7 @@ def main() -> int:
     p.add_argument("--student", type=str, default="beginner")
     p.add_argument("--ollama-model", type=str, default="llama3.1:8b")
     p.add_argument("--fail-ollama", action="store_true", help="simulate Ollama down (Test 6)")
+    p.add_argument("--channel", type=int, default=0, help="audio channel to use (0 or 1)")
     args = p.parse_args()
     return run_session(args)
 
