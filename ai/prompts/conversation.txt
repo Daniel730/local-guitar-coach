@@ -1,0 +1,18 @@
+A conversational question was asked during practice.
+
+# Teacher Context (supplied data — reason only from this)
+{{teacher_context}}
+
+# Conversation state
+- Current exercise: {{current_exercise}}
+- Latest performance: {{latest_performance}}
+- Student question: {{user_request}}
+
+# Your task
+Answer the student's question using ONLY the supplied context. If the question refers to
+"this"/"that"/"it", resolve it to the current execution or latest performance above.
+If the context does not contain enough information, return action "ANSWER" and say what
+is missing — do not invent it.
+
+Return ONLY valid JSON matching the TeacherAction schema, with action "ANSWER" and the
+spoken_feedback field containing your response.

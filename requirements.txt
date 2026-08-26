@@ -1,0 +1,5 @@
+# MVP-0 runtime + test deps (local-guitar-coach / Riff)
+# Single venv covers MVP-0 and the near-term MVP-1 (one Python process).
+sounddevice>=0.4.6
+numpy>=1.26
+pytest>=7.0

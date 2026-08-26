@@ -1,0 +1,9 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Capture artifacts (physical signal tests)
+*.json
+!requirements.txt

@@ -1,0 +1,18 @@
+A decision is requested after a performance.
+
+# Teacher Context (supplied data — reason only from this)
+{{teacher_context}}
+
+# Current request (may be empty for autonomous decision)
+{{user_request}}
+
+# Your task
+Propose ONE action from the closed schema. Provide:
+- action: one of the allowed enum values
+- exercise_id: the exercise to act on (must be from the supplied list, or null)
+- tempo: recommended BPM if the action implies a tempo (SLOW_DOWN/SPEED_UP/REPEAT/START_EXERCISE). Must be within the exercise's [start_bpm, target_bpm] range when known. Use null otherwise.
+- reason: one sentence of pedagogical reasoning FROM THE DATA
+- spoken_feedback: short student-facing feedback
+- voice_mode: keep the current voice_mode unless the situation clearly warrants a change
+
+Return ONLY valid JSON matching the TeacherAction schema. No prose outside the JSON.
