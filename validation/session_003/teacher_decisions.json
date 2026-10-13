@@ -1,0 +1,53 @@
+{
+  "teacher_context": {
+    "student": {
+      "experience": "beginner",
+      "goals": [
+        "rock"
+      ],
+      "practice_minutes": 30
+    },
+    "current_skill": null,
+    "current_exercise": {
+      "id": "scale_e_minor_001",
+      "start_bpm": 60,
+      "target_bpm": 100
+    },
+    "latest_performance": {
+      "exercise_id": "scale_e_minor_001",
+      "note_accuracy": 0.0,
+      "timing_accuracy": 0.0,
+      "uncertain_ratio": 0.0,
+      "target_bpm": 100,
+      "performed_bpm": null,
+      "tempo_ratio": null,
+      "mean_timing_error_ms": 0.0,
+      "consistency": null,
+      "duration_seconds": null,
+      "counts": {
+        "correct": 0,
+        "wrong": 0,
+        "missing": 6,
+        "extra": 0,
+        "uncertain": 0
+      },
+      "timing_errors_ms": [],
+      "note_timing": []
+    },
+    "available_exercises": [
+      "scale_e_minor_001"
+    ],
+    "voice_mode": "COACH"
+  },
+  "decision": {
+    "accepted": true,
+    "action": "SLOW_DOWN",
+    "exercise_id": "scale_e_minor_001",
+    "tempo": null,
+    "reason": "The student has not yet reached the target BPM of 100, so slowing down is necessary to focus on accuracy.",
+    "spoken_feedback": "Let's slow it down and work on those tricky notes!",
+    "source": "llm",
+    "model": "llama3.1:8b"
+  },
+  "ollama_failed": false
+}

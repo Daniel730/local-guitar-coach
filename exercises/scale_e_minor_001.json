@@ -1,0 +1,39 @@
+{
+  "id": "scale_e_minor_001",
+  "name": "E Minor Pentatonic",
+  "description": "Ascending E minor pentatonic scale across the open position. Builds fretboard familiarity and clean single-note picking.",
+  "skill": "pentatonic",
+  "subskill": "minor_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 1,
+  "target_notes": ["E2", "G2", "A2", "B2", "D3", "E3"],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Play the E minor pentatonic scale ascending, cleanly and in time.",
+  "prerequisites": [],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "rushing the string change between G2 and A2",
+    "muffled notes on the low E string"
+  ],
+  "hints": [
+    "keep the pick angle consistent",
+    "let each note ring before moving"
+  ],
+  "progression": {
+    "easier": "scale_e_minor_001 at 60 BPM",
+    "harder": "scale_e_minor_001 at 120 BPM"
+  }
+}

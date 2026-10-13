@@ -26,11 +26,16 @@ def test_load_exercise_from_dict():
         "skill": "pentatonic",
         "difficulty": 1,
         "target_notes": ["E2", "G2", "A2", "B2", "D3", "E3"],
+        "start_bpm": 60,
+        "target_bpm": 100,
+        "subdivision": "quarter",
     }
     ex = exercise_from_dict(data)
     assert ex.id == "scale_e_minor_001"
     assert ex.expected_sequence == ["E2", "G2", "A2", "B2", "D3", "E3"]
     assert ex.skill == "pentatonic"
+    assert ex.target_bpm == 100
+    assert ex.subdivision == "quarter"
 
 
 def test_load_exercise_file(tmp_path):
@@ -38,6 +43,7 @@ def test_load_exercise_file(tmp_path):
     p.write_text(json.dumps({
         "id": "x1", "name": "X", "skill": "s", "difficulty": 2,
         "target_notes": ["E2", "G2"],
+        "start_bpm": 60, "target_bpm": 100, "subdivision": "quarter",
     }), encoding="utf-8")
     ex = load_exercise(p)
     assert ex.id == "x1"
@@ -58,6 +64,7 @@ def test_real_exercise_comparison():
         "id": "scale_e_minor_001", "name": "E Minor Pentatonic",
         "skill": "pentatonic", "difficulty": 1,
         "target_notes": ["E2", "G2", "A2", "B2", "D3", "E3"],
+        "start_bpm": 60, "target_bpm": 100, "subdivision": "quarter",
     })
     played = [
         _ev("E2", start=0.0, dur=0.2),

@@ -1,7 +1,7 @@
 # Local Guitar Coach — codename: Riff
 
 Local, adaptive, data-driven guitar teacher with voice interaction.
-Target: Windows + M-Audio M-Track Duo + Ollama. See `docs/ARCHITECTURE.md`.
+Target: Windows + M-Audio M-Track Duo + Ollama. See `docs/PROJECT_STATE.md` (canonical).
 
 ## Current state
 
@@ -11,9 +11,10 @@ Target: Windows + M-Audio M-Track Duo + Ollama. See `docs/ARCHITECTURE.md`.
 M-Track Duo -> Windows -> Python -> Audio captured successfully
 ```
 
-This repo currently implements **only** MVP-0. Per `ARCHITECTURE.md` §31,
-MVP-0 does NOT include Ollama, voice, curriculum, database, GUI, AI, songs
-or accounts. Those are later MVPs.
+This repo implements **MVP-0 through MVP-5** (see `docs/PROJECT_STATE.md`).
+**MVP-6 (Web App)** is OPEN — gated on the acceptance criteria in `PROJECT_STATE.md` §4.
+Per the contract schema, MVP-6 verifies the full server-side capture →
+perception → teacher → telemetry → browser path before any new feature work.
 
 ## Layout
 

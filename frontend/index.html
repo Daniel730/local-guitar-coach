@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Riff — local adaptive guitar coach">
+    <title>Riff — Guitar Coach</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- ===== HEADER (compact) ===== -->
+    <header class="topbar">
+        <a class="brand" href="#" data-nav="coach">
+            <span class="brand-pick" aria-hidden="true"></span>
+            <span class="brand-name">RIFF</span>
+        </a>
+
+        <nav class="topnav" id="topnav">
+            <button type="button" class="nav-item active" data-nav="coach">Coach</button>
+            <button type="button" class="nav-item" data-nav="progress">Progress</button>
+            <button type="button" class="nav-item" data-nav="exercises">Exercises</button>
+            <button type="button" class="nav-item" data-nav="settings">Settings</button>
+        </nav>
+
+        <div class="connection-status" id="status">
+            <span class="status-dot"></span>
+            <span>Disconnected</span>
+        </div>
+    </header>
+
+    <!-- ===== COACH VIEW ===== -->
+    <main class="main-grid view" id="view-coach">
+
+        <!-- LEFT: current exercise + next notes -->
+        <section class="coach-left" id="session-exercise">
+
+            <div class="eyebrow">CURRENT EXERCISE</div>
+            <h1 id="exercise-target">Choose an exercise</h1>
+
+            <div class="bpm-block">
+                <span class="bpm-value" id="current-task">—</span>
+                <span class="bpm-label">BPM</span>
+            </div>
+
+            <div class="task-label">NEXT NOTES</div>
+            <div class="note-sequence" id="progression">
+                <span class="empty-state">Select an exercise to begin.</span>
+            </div>
+
+            <div class="pattern-row">
+                <span class="pattern-name">PATTERN</span>
+                <span class="pattern-value">Ascending</span>
+            </div>
+
+        </section>
+
+        <!-- CENTER: fretboard (main visual) -->
+        <section class="neck-card">
+
+            <div class="section-header">
+                <div class="eyebrow">FRETBOARD</div>
+                <div class="neck-legend">
+                    <span class="legend-item"><span class="legend-dot target"></span>target</span>
+                    <span class="legend-item"><span class="legend-dot next"></span>next</span>
+                    <span class="legend-item"><span class="legend-dot current"></span>played</span>
+                </div>
+            </div>
+
+            <div class="neck-wrap">
+                <div class="neck-container" id="neck" aria-label="Guitar fretboard">
+                    <!-- neck.js injects the SVG here -->
+                </div>
+            </div>
+
+            <p class="neck-hint" id="neck-hint">Waiting for session</p>
+
+        </section>
+
+        <!-- RIGHT: live input + coach -->
+        <section class="coach-right">
+
+            <div class="pitch-card">
+
+                <div class="section-header compact">
+                    <div class="eyebrow">LIVE INPUT</div>
+                    <div class="input-state"><span class="input-state-dot"></span>Listening</div>
+                </div>
+
+                <div class="pitch-main">
+                    <div class="pitch-note" id="pitch-note">—</div>
+                    <div class="pitch-sub">
+                        <span id="pitch-frequency">—</span><span class="unit">Hz</span>
+                        <span class="pitch-cents-text"><span id="pitch-cents-value">—</span><span class="unit">cents</span></span>
+                    </div>
+                    <!-- cents indicator kept as contract; positioned by JS -->
+                    <div class="cents-track"><div class="cents-center"></div><div class="cents-indicator" id="pitch-cents"></div></div>
+                    <!-- wrong/right readout: pure UX addition, driven by app.js -->
+                    <div class="pitch-match" id="pitch-match" hidden></div>
+                </div>
+
+                <div class="pitch-metadata">
+                    <div class="metric"><span class="metric-label">Confidence</span><strong id="pitch-confidence">—</strong></div>
+                    <div class="metric"><span class="metric-label">Onset</span><strong id="pitch-onset">—</strong></div>
+                </div>
+
+                <div class="channel-meters">
+                    <div class="channel">
+                        <div class="channel-header"><span>CH 1</span><span id="meter-ch1-value">—</span></div>
+                        <div class="meter-track"><div class="meter-fill" id="meter-ch1"></div></div>
+                    </div>
+                    <div class="channel">
+                        <div class="channel-header"><span>CH 2</span><span id="meter-ch2-value">—</span></div>
+                        <div class="meter-track"><div class="meter-fill" id="meter-ch2"></div></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- COACH FEEDBACK -->
+            <div class="teacher-card">
+
+                <div class="section-header compact">
+                    <div class="eyebrow">RIFF COACH</div>
+                    <div class="teacher-source" id="teacher-source">—</div>
+                </div>
+
+                <div class="teacher-action-area">
+                    <div class="teacher-action" id="teacher-action">Ready</div>
+                    <div class="teacher-tempo"><span id="teacher-tempo">—</span><span class="unit">BPM</span></div>
+                </div>
+
+                <p class="teacher-feedback" id="teacher-feedback">Start a session and I'll listen to your playing.</p>
+
+                <div class="teacher-reason"><span>WHY</span><p id="teacher-reason">—</p></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ===== PROGRESS VIEW ===== -->
+    <main class="view" id="view-progress" hidden>
+        <section class="progress-card card">
+            <div class="section-header">
+                <div class="eyebrow">PROGRESS</div>
+                <h2>Your practice</h2>
+            </div>
+            <div class="skill-list" id="skill-list"></div>
+            <div class="recent">
+                <div class="recent-title">RECENT SESSIONS</div>
+                <div id="recent-sessions">No sessions yet.</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== EXERCISES VIEW ===== -->
+    <main class="view" id="view-exercises" hidden>
+        <section class="progress-card card">
+            <div class="section-header">
+                <div class="eyebrow">EXERCISES</div>
+                <h2>Choose what to practice</h2>
+            </div>
+            <div class="exercise-list" id="exercise-list">
+                <p class="muted">Loading exercises…</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    <main class="view" id="view-settings" hidden>
+        <section class="progress-card card">
+            <div class="section-header">
+                <div class="eyebrow">SETTINGS</div>
+                <h2>Input</h2>
+            </div>
+            <div class="settings-body">
+                <div class="pattern-row">
+                    <span class="pattern-name">GAIN</span>
+                    <span class="gain-options" id="settings-gain"></span>
+                </div>
+                <p class="muted">Audio capture runs on the local device (M-Track) in the backend.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== SESSION CONTROL BAR (compact, always accessible) ===== -->
+    <section class="session-bar" id="session-controls">
+
+        <div class="session-exercise">
+            <label for="exercise-select">EXERCISE</label>
+            <select id="exercise-select">
+                <option value="">Choose an exercise</option>
+            </select>
+        </div>
+
+        <div class="session-actions">
+            <button id="btn-start" class="button button-primary" type="button">
+                <span class="button-icon">▶</span>START
+            </button>
+            <button id="btn-stop" class="button button-secondary" type="button" disabled>
+                <span class="button-icon">■</span>STOP
+            </button>
+        </div>
+
+    </section>
+
+    <!-- ===== EVENT LOG (collapsed) ===== -->
+    <section class="diagnostics">
+        <details>
+            <summary>
+                <span class="diagnostics-icon">▸</span>
+                EVENT LOG
+                <span class="diagnostics-description" id="event-log-count">0 events</span>
+            </summary>
+            <div class="debug-panel">
+                <div class="debug-toolbar">
+                    <span>WEBSOCKET TELEMETRY</span>
+                    <span class="debug-live"><span></span>live</span>
+                </div>
+                <pre id="debug-log"></pre>
+            </div>
+        </details>
+    </section>
+
+    <footer class="footer"><span>RIFF</span><span>Local · Private · Adaptive</span></footer>
+
+</div>
+
+<script src="/neck.js" defer></script>
+<script src="/app.js" defer></script>
+</body>
+</html>

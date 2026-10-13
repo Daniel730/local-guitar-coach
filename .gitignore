@@ -4,6 +4,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# Capture artifacts (physical signal tests)
-*.json
-!requirements.txt
+# Capture artifacts (physical signal tests) and runtime session data
+capture_*.json
+data/sessions/
+
+# Local scratch
+_inspect_*.py
+nul

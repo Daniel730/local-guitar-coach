@@ -1,0 +1,67 @@
+{
+  "performance": {
+    "exercise_id": "scale_e_minor_001",
+    "note_accuracy": 0.0,
+    "timing_accuracy": 0.0,
+    "uncertain_ratio": 0.0,
+    "target_bpm": 100,
+    "performed_bpm": null,
+    "tempo_ratio": null,
+    "mean_timing_error_ms": 0.0,
+    "consistency": null,
+    "duration_seconds": null,
+    "counts": {
+      "correct": 0,
+      "wrong": 0,
+      "missing": 6,
+      "extra": 0,
+      "uncertain": 0
+    },
+    "timing_errors_ms": [],
+    "note_timing": []
+  },
+  "alignment": {
+    "exercise_id": "scale_e_minor_001",
+    "expected": [
+      "E2",
+      "G2",
+      "A2",
+      "B2",
+      "D3",
+      "E3"
+    ],
+    "played": [],
+    "alignment": [
+      {
+        "expected": "E2",
+        "played": null,
+        "status": "missing"
+      },
+      {
+        "expected": "G2",
+        "played": null,
+        "status": "missing"
+      },
+      {
+        "expected": "A2",
+        "played": null,
+        "status": "missing"
+      },
+      {
+        "expected": "B2",
+        "played": null,
+        "status": "missing"
+      },
+      {
+        "expected": "D3",
+        "played": null,
+        "status": "missing"
+      },
+      {
+        "expected": "E3",
+        "played": null,
+        "status": "missing"
+      }
+    ]
+  }
+}

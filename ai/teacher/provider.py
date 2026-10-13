@@ -62,9 +62,13 @@ class FakeLLMProvider(LLMProvider):
 class OllamaProvider(LLMProvider):
     """Real Ollama backend. Lazy import so the package works without ollama SDK."""
 
+    DEFAULT_HOST = "http://localhost:11434"
+    # Ollama can be slow on cold start (model load). 60s avoids false fallback.
+    DEFAULT_TIMEOUT_S = 60.0
+
     def __init__(self, model: str = "llama3.1:8b", host: Optional[str] = None) -> None:
         self.model = model
-        self.host = host
+        self.host = host or self.DEFAULT_HOST
         self._client = None
 
     def _ensure_client(self):
@@ -73,9 +77,10 @@ class OllamaProvider(LLMProvider):
                 import ollama
             except ImportError:
                 raise RuntimeError("ollama package not installed")
-            self._client = ollama if self.host is None else ollama.Client(host=self.host)
+            # ollama 0.6.x takes timeout at the Client level, not in chat().
+            self._client = ollama.Client(host=self.host, timeout=self.DEFAULT_TIMEOUT_S)
 
-    def generate(self, system_prompt: str, user_prompt: str, timeout_s: float = 30.0) -> str:
+    def generate(self, system_prompt: str, user_prompt: str, timeout_s: float = None) -> str:
         self._ensure_client()
         try:
             resp = self._client.chat(

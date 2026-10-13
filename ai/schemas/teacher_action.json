@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TeacherAction",
+  "description": "Closed action contract for the MVP-5 Teacher Brain. The LLM proposes; the system validates and executes.",
+  "type": "object",
+  "required": ["action"],
+  "properties": {
+    "action": {
+      "enum": [
+        "START_EXERCISE",
+        "REPEAT",
+        "SLOW_DOWN",
+        "SPEED_UP",
+        "CHANGE_EXERCISE",
+        "EXPLAIN",
+        "TAKE_BREAK",
+        "START_SONG",
+        "END_EXERCISE",
+        "END_SESSION",
+        "ANSWER"
+      ]
+    },
+    "exercise_id": { "type": ["string", "null"] },
+    "tempo": { "type": ["number", "null"] },
+    "repetitions": { "type": ["integer", "null"] },
+    "reason": { "type": ["string", "null"] },
+    "spoken_feedback": { "type": ["string", "null"] },
+    "voice_mode": {
+      "enum": ["SILENT", "COACH", "TEACHER", "PERFORMANCE", "CONVERSATIONAL", null]
+    }
+  },
+  "additionalProperties": false
+}
