@@ -1,7 +1,9 @@
 """TeacherService — wraps existing Teacher + Policy + Context for WebSocket sessions."""
 from __future__ import annotations
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import json
+import threading
+import time
 
 from ai.teacher import Teacher, TeacherContext, TeacherDecision, PolicyValidator, FakeLLMProvider
 from ai.teacher.provider import OllamaProvider
@@ -12,7 +14,10 @@ from perception.events import NoteEvent
 
 
 class TeacherService:
-    """Orchestrates Teacher decision for a session.
+    """Orchestrates Teacher decision for a session, one decision per ATTEMPT.
+
+    An attempt ends when the student has played as many notes as the exercise
+    expects, or after ATTEMPT_SILENCE_S of silence following at least one note.
 
     CHANGE-05: tempo/BPM is a property of the exercise (the content). This
     service reads start_bpm/target_bpm/subdivision from the loaded Exercise
@@ -24,8 +29,10 @@ class TeacherService:
         exercise_id: str,
         ollama_model: str = "llama3.1:8b",
         fail_ollama: bool = False,
+        attempt_silence_s: float = 2.5,
     ) -> None:
         self.exercise_id = exercise_id
+        self.attempt_silence_s = attempt_silence_s
 
         # Load exercise details (single source of truth for tempo, CHANGE-05).
         from exercises.exercise import load_exercise
@@ -60,31 +67,68 @@ class TeacherService:
         self._comparison = None
         self._performance: Optional[PerformanceResult] = None
         self._last_decision: Optional[TeacherDecision] = None
+        # Note events arrive from the audio thread; attempts close from the
+        # executor thread.
+        self._lock = threading.Lock()
+        self._last_note_at: Optional[float] = None
+        self.attempt_count = 0
+        self.performance_persisted = False
 
     def add_note_event(self, note_event: NoteEvent) -> None:
-        self._note_events.append(note_event)
+        with self._lock:
+            self._note_events.append(note_event)
+            self._last_note_at = time.monotonic()
 
-    def evaluate_and_decide(self) -> TeacherDecision:
-        """Run the full pipeline: compare -> performance -> context -> teacher."""
-        from perception.sequence import compare
-        from perception.performance import PerformanceEvaluator
-        from ai.teacher.build_context import build_context
+    def has_pending_notes(self) -> bool:
+        with self._lock:
+            return bool(self._note_events)
 
+    def attempt_ready(self, now: Optional[float] = None) -> bool:
+        """True when the current attempt is complete (all notes or silence)."""
+        with self._lock:
+            if not self._note_events:
+                return False
+            if len(self._note_events) >= len(self.exercise.expected_sequence):
+                return True
+            now = time.monotonic() if now is None else now
+            return now - (self._last_note_at or now) >= self.attempt_silence_s
+
+    def _take_notes(self) -> List[NoteEvent]:
+        with self._lock:
+            notes, self._note_events = self._note_events, []
+            self._last_note_at = None
+        return notes
+
+    def evaluate_pending(self) -> Optional[PerformanceResult]:
+        """Evaluate buffered notes WITHOUT asking the teacher (used on stop)."""
+        notes = self._take_notes()
+        if not notes:
+            return None
+        self.attempt_count += 1
+        return self._evaluate(notes)
+
+    def close_attempt(self) -> TeacherDecision:
+        """Evaluate the buffered attempt, ask the teacher once, clear the buffer."""
+        notes = self._take_notes()
+        self.attempt_count += 1
+        return self.evaluate_and_decide(notes)
+
+    def _evaluate(self, notes: List[NoteEvent]) -> PerformanceResult:
+        """compare -> performance for one attempt."""
         # Tempo from the exercise definition (CHANGE-05).
         target_bpm = self.exercise.target_bpm
         subdivision = self.exercise.subdivision
-        start_bpm = self.exercise.start_bpm
 
         # Compare
         self._comparison = compare(
             self.exercise_id,
             self.exercise.expected_sequence,
-            self._note_events,
+            notes,
         )
 
         # Estimate performed BPM from note events
         performed_bpm = self._estimate_bpm(
-            self._note_events,
+            notes,
             subdivision,
             target_bpm,
         )
@@ -97,6 +141,17 @@ class TeacherService:
             subdivision=subdivision,
             performed_bpm=performed_bpm,
         )
+        self.performance_persisted = False
+        return self._performance
+
+    def evaluate_and_decide(self, notes: Optional[List[NoteEvent]] = None) -> TeacherDecision:
+        """Run the full pipeline: compare -> performance -> context -> teacher."""
+        if notes is None:
+            with self._lock:
+                notes = list(self._note_events)
+        self._evaluate(notes)
+        target_bpm = self.exercise.target_bpm
+        start_bpm = self.exercise.start_bpm
 
         # Build context
         ctx = build_context(
@@ -153,7 +208,9 @@ class TeacherService:
         return round(60.0 / beat, 1)
 
     def reset(self) -> None:
-        self._note_events = []
+        with self._lock:
+            self._note_events = []
+            self._last_note_at = None
         self._comparison = None
         self._performance = None
         self._last_decision = None

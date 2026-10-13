@@ -331,6 +331,20 @@
                 bumpEvent();
                 log(`teacher     ${data.action} (${data.source})`);
                 break;
+            case "attempt_result": {
+                // One attempt closed: show the 4 dims (no score) and reset the guide.
+                const p = data.performance || {};
+                const pct = v => v != null ? Math.round(v * 100) + '%' : '--';
+                neckHintEl.textContent = `Attempt ${data.attempt} · notes ${pct(p.note_accuracy)}`
+                    + ` · timing ${pct(p.timing_accuracy)}`
+                    + (p.performed_bpm != null ? ` · ${Math.round(p.performed_bpm)} BPM` : '');
+                log(`attempt     #${data.attempt} notes=${pct(p.note_accuracy)} timing=${pct(p.timing_accuracy)}`);
+                bumpEvent();
+                playedIndex = 0;
+                markNext();
+                updatePills();
+                break;
+            }
             case "session_state":
                 if (data.status === "running") {
                     bpmValueEl.textContent = data.target_bpm ?? bpmValueEl.textContent;

@@ -73,6 +73,7 @@ class SessionService:
             target_bpm=tempo["target_bpm"],
             subdivision=tempo["subdivision"],
             start_bpm=tempo["start_bpm"],
+            session_id=session_id,
         )
         self._sessions[session_id] = session
 
@@ -127,20 +128,52 @@ class SessionService:
         logger.info("[session] start_capture session_id=%s channels_dbfs=%s", session_id, channels_dbfs)
         return channels_dbfs
 
-    def persist_session(self, session_id: str) -> None:
-        """Persist performance + skill state for a finished/stopped Web App session."""
+    def close_attempt(self, session_id: str) -> List[dict]:
+        """Close the current attempt: one teacher decision + persistence.
+
+        Returns the telemetry messages to send (attempt_result, teacher).
+        Runs in an executor thread (the teacher may call Ollama).
+        """
+        teacher_svc = self._teacher_services.get(session_id)
+        if not teacher_svc:
+            return []
+        teacher_svc.close_attempt()
+        state = self.persist_session(session_id)
+        msgs = [{
+            "type": "attempt_result",
+            "attempt": teacher_svc.attempt_count,
+            "exercise_id": teacher_svc.exercise_id,
+            "performance": teacher_svc.get_performance_telemetry(),
+            "skill": state.to_dict() if state is not None else None,
+        }]
+        telemetry = teacher_svc.get_teacher_telemetry()
+        if telemetry:
+            msgs.append(telemetry)
+        return msgs
+
+    def persist_session(self, session_id: str) -> Optional[SkillState]:
+        """Persist performance + skill state for the latest evaluated attempt.
+
+        Idempotent per attempt: a performance is persisted at most once.
+        Returns the updated SkillState (None when nothing was persisted).
+        """
         logger.info("[session] persist_session session_id=%s", session_id)
         session = self._sessions.get(session_id)
         teacher_svc = self._teacher_services.get(session_id)
         if not session or not teacher_svc:
             logger.warning("[session] persist_session: missing session or teacher for %s", session_id)
-            return
+            return None
         perf = teacher_svc._performance  # PerformanceResult or None
         if perf is None:
             logger.info("[session] persist_session: no performance data for %s", session_id)
-            return
+            return None
+        if getattr(teacher_svc, "performance_persisted", False):
+            return None
         # Persist the per-session performance result (P1-B part 1)
-        persistence.save_performance(perf, session_id=session_id)
+        # One file per attempt so attempts don't overwrite each other.
+        attempt = getattr(teacher_svc, "attempt_count", 0)
+        record_id = f"{session_id}_a{attempt}" if attempt else session_id
+        persistence.save_performance(perf, session_id=record_id)
         # Update + persist the skill state (P1-B part 2)
         skill = getattr(teacher_svc.exercise, "skill", None) or "unknown"
         try:
@@ -150,15 +183,23 @@ class SessionService:
         tracker = SkillStateTracker(skill=skill)
         tracker.update(state, perf, target_bpm=session.target_bpm)
         persistence.save_skill_state(state)
+        teacher_svc.performance_persisted = True
         logger.info("[session] persisted session_id=%s skill=%s", session_id, skill)
+        return state
 
     def stop_session(self, session_id: str) -> bool:
         """Stop and cleanup a session."""
         logger.info("[session] stop_session session_id=%s", session_id)
-        # Persist performance + skill BEFORE tearing down the teacher service.
-        self.persist_session(session_id)
+        # Stop capture first so no note events arrive mid-teardown.
         if session_id in self._audio_services:
             self._audio_services[session_id].stop()
+        # Evaluate an unfinished attempt (no teacher call) and persist it
+        # BEFORE tearing down the teacher service.
+        teacher_svc = self._teacher_services.get(session_id)
+        if teacher_svc and teacher_svc.has_pending_notes():
+            teacher_svc.evaluate_pending()
+        self.persist_session(session_id)
+        if session_id in self._audio_services:
             del self._audio_services[session_id]
         if session_id in self._teacher_services:
             self._teacher_services[session_id].reset()

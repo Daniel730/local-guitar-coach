@@ -95,6 +95,7 @@ class Session:
     raw_events: List[Any] = field(default_factory=list)   # MusicalEvent objects
     last_teacher_decision: Optional[Any] = None
     blocks_processed: int = 0
+    session_id: str = ""
 
 
 # ===== REST models =====

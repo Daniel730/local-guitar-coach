@@ -83,7 +83,7 @@ class WebSocketHandler:
             sample_rate=sample_rate, block_size=block_size, device=device,
             gain=gain, amplitude_floor=amplitude_floor,
         )
-        session_id = self._find_session_id(session.target_bpm, exercise_id)
+        session_id = session.session_id
         self._ws_by_session[session_id] = websocket
 
         # Register emitter: thread-safe push via call_soon_threadsafe
@@ -119,13 +119,6 @@ class WebSocketHandler:
         ).model_dump())
         return session_id
 
-    def _find_session_id(self, target_bpm, exercise_id) -> str:
-        # Single-user MVP: find the newest session matching exercise
-        for sid, s in self.session_service._sessions.items():
-            if s.exercise_id == exercise_id:
-                return sid
-        return next(iter(self.session_service._sessions))
-
     def _cleanup(self, session_id: str) -> None:
         self.session_service.stop_session(session_id)
         if session_id in self._ws_by_session:
@@ -135,23 +128,23 @@ class WebSocketHandler:
             task.cancel()
 
     async def _teacher_loop(self, session_id: str) -> None:
+        """Close attempts as they complete: one teacher decision per attempt."""
         try:
             while True:
-                await asyncio.sleep(3.0)
+                await asyncio.sleep(0.25)
                 session = self.session_service.get_session(session_id)
                 if not session or session.status != "running":
                     break
                 teacher_svc = self.session_service.get_teacher_service(session_id)
                 ws = self._ws_by_session.get(session_id)
-                if teacher_svc and ws and teacher_svc._note_events:
+                if teacher_svc and ws and teacher_svc.attempt_ready():
                     try:
-                        await self._loop.run_in_executor(None, teacher_svc.evaluate_and_decide)
-                        telemetry = teacher_svc.get_teacher_telemetry()
-                        if telemetry:
-                            await ws.send_text(json.dumps(telemetry))
+                        msgs = await self._loop.run_in_executor(
+                            None, self.session_service.close_attempt, session_id)
+                        for m in msgs:
+                            await ws.send_text(json.dumps(m))
                     except Exception:
                         logger.exception("Teacher decision/send error")
-                        break
         except asyncio.CancelledError:
             pass
         except Exception:
