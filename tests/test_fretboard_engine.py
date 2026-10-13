@@ -131,17 +131,8 @@ def test_target_note_positions_match_exercise():
         ("A2", 5, 0),
         ("B2", 5, 2),
         ("D3", 4, 0),
-        # E3 — one valid position; we pick string 1, fret -1? No — must be valid.
-        # E3 MIDI=52. E4=64. 52-64=-12 => one octave down also not fret (fret must be >=0).
-        # So E3 must be on a lower string: e.g. string 2 open = B3 (MIDI=59), E3=52 -> need to go up
-        # Actually let's pick a specific valid position explicitly.
-        ("E3", 2, 3),   # B3 (59) + 3 frets = 62? Wrong. Let's just compute:
-        # B3 MIDI=59. 52-59=-7 => can't go back. So string 2 can't.
-        # Let's use string 1, fret 0 = E4 (64), and that's NOT E3. So E3 requires another string:
-        # string 1, fret -1 is invalid. So we must choose a DIFFERENT note, or accept that E3 is
-        # not reproducible as one of these simple open-position cases on the first few frets.
-        # For the test, we'll use a note we CAN place: pick "C4" which we know exists:
-        ("C4", 2, 1),   # B3 +1 = C4. B3=59, C4=60. ✓
+        ("E3", 4, 2),   # D3 (50) + 2 = E3 (52)
+        ("C4", 2, 1),   # B3 (59) + 1 = C4 (60)
     ]
     for pitch, string, fret in cases:
         assert pitch_at(FretPosition(string=string, fret=fret)) == pitch

@@ -148,8 +148,18 @@ def test_resolve_explicit_invalid_raises():
         resolve_device(config_device=999, host_api=None)
 
 
-def test_resolve_autodetect_mtrack():
+def test_resolve_autodetect_mtrack(monkeypatch):
+    # Mock device list: indices change per host API on real hardware, so the
+    # test must not depend on the machine's actual devices.
+    import audio_probe.devices as devmod
+    mock = [
+        {"index": 0, "name": "Microsoft Sound Mapper - Input", "max_input_channels": 2,
+         "default_sample_rate": 44100.0, "host_api": "MME", "is_default": False},
+        {"index": 1, "name": "Line (M-Audio M-Track Duo)", "max_input_channels": 2,
+         "default_sample_rate": 44100.0, "host_api": "MME", "is_default": False},
+        {"index": 7, "name": "Microphone (Realtek Audio)", "max_input_channels": 2,
+         "default_sample_rate": 44100.0, "host_api": "Windows WASAPI", "is_default": True},
+    ]
+    monkeypatch.setattr(devmod, "list_input_devices", lambda: mock)
     idx = resolve_device(config_device=None, host_api=None)
-    # should pick the default M-Track (index 1) without host_api constraint,
-    # because find_mtrack_duo returns the default match.
     assert idx == 1
