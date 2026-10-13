@@ -48,14 +48,21 @@ class TeacherService:
             self.provider = OllamaProvider(model=ollama_model)
 
         # Policy — tempo bounds come from the exercise definition.
+        # The whole curriculum is offered, so a teacher START_EXERCISE
+        # suggestion is validated against real bounds/prerequisites.
+        from exercises.curriculum import list_exercises
+        curriculum = {e.id: e for e in list_exercises()}
+        curriculum[exercise_id] = self.exercise
+        self.available_exercise_ids = list(curriculum)
         self.policy = PolicyValidator(
             available_exercises={
-                exercise_id: {
-                    "start_bpm": self.exercise.start_bpm,
-                    "target_bpm": self.exercise.target_bpm,
+                ex.id: {
+                    "start_bpm": ex.start_bpm,
+                    "target_bpm": ex.target_bpm,
                     "enabled": True,
-                    "prerequisites": [],
+                    "prerequisites": list(ex.prerequisites),
                 }
+                for ex in curriculum.values()
             },
             session_active=True,
             time_remaining_s=600.0,
@@ -158,7 +165,7 @@ class TeacherService:
             student_profile={"experience": "beginner", "goals": ["rock"], "practice_minutes": 30},
             exercise={"id": self.exercise_id, "start_bpm": start_bpm, "target_bpm": target_bpm},
             performance=self._performance,
-            available_exercises=[self.exercise_id],
+            available_exercises=list(self.available_exercise_ids),
             voice_mode="COACH",
         )
         ctx.rendered = json.dumps(ctx.to_dict(), ensure_ascii=False)

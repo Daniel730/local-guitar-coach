@@ -118,6 +118,17 @@ async def progress():
     return {"exercises": exercises, "recent": recent, "skills": skills}
 
 
+@router.get("/next")
+async def next_step(current: str):
+    """Deterministic progression (exercises.curriculum): repeat or advance."""
+    from exercises import curriculum
+    exercises = curriculum.list_exercises()
+    try:
+        return curriculum.next_exercise(current, exercises, curriculum.load_attempts())
+    except KeyError:
+        raise HTTPException(404, "Exercise not found")
+
+
 def find_exercise_path(ex_id: str) -> str:
     p = Path("exercises") / f"{ex_id}.json"
     return str(p) if p.exists() else f"exercises/{ex_id}.json"
