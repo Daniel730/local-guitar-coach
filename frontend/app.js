@@ -3,7 +3,9 @@
    the WS and plots telemetry + guides on the neck.
 
    PRESERVED CONTRACTS: all getElementById targets, neck.js API, WS messages.
-   ADDED (UI only): tab navigation, exercises/settings views, event counter.
+   ADDED (UI only): tab navigation, exercises/settings views, event counter,
+   voice (speechSynthesis), metronome + count-in (Web Audio OUTPUT only),
+   progression banner (/api/next). The browser never captures audio.
    */
 (() => {
     const wsProto = location.protocol === "https:" ? "wss://" : "ws://";
@@ -21,6 +23,11 @@
     let selectedDevice = null;   // from /api/devices (P1-A)
     let selectedDeviceChannels = 0;  // channels of the chosen device (P1-A)
     let selectedChannel = 0;     // derived from device channels; 0=CH1, 1=CH2
+    let wsConnected = false;
+    let countingIn = false;
+    let exerciseMeta = {};       // id -> {name, start_bpm, target_bpm}
+    let teacherTempo = null;     // latest teacher tempo (overrides exercise BPM)
+    let pendingNextExercise = null;
 
     // ---- DOM (contract targets) ----
     const statusEl = document.getElementById('status');
@@ -55,6 +62,17 @@
     const exerciseListEl = document.getElementById('exercise-list');
     const settingsGainEl = document.getElementById('settings-gain');
     const eventLogCountEl = document.getElementById('event-log-count');
+    const btnMetronome = document.getElementById('btn-metronome');
+    const metronomeBpmEl = document.getElementById('metronome-bpm');
+    const countInEl = document.getElementById('countin-overlay');
+    const countInNumberEl = document.getElementById('countin-number');
+    const nextBannerEl = document.getElementById('next-banner');
+    const nextNameEl = document.getElementById('next-name');
+    const nextReasonEl = document.getElementById('next-reason');
+    const btnNext = document.getElementById('btn-next');
+    const voiceToggleEl = document.getElementById('settings-voice-enabled');
+    const voiceSelectEl = document.getElementById('settings-voice');
+    const voiceNoteEl = document.getElementById('settings-voice-note');
 
     window.__riff = { setCents: (c) => { lastCents = c; } };
 
@@ -64,18 +82,35 @@
     }
     function bumpEvent(msg) {
         eventCount++;
-        if (eventLogCountEl) eventLogCountEl.textContent = `${eventCount} events`;
+        if (eventLogCountEl) eventLogCountEl.textContent = `${eventCount} eventos`;
     }
 
-    function setStatus(connected) {
-        sessionActive = connected;
-        statusEl.children[1].textContent = connected ? "Connected" : "Disconnected";
+    // storage helpers: localStorage may throw (private mode / blocked)
+    function storageGet(key) {
+        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function storageSet(key, value) {
+        try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+    }
+
+    // WS connection and session state are tracked separately
+    function setConnection(connected) {
+        wsConnected = connected;
+        statusEl.children[1].textContent = connected ? "Conectado" : "Desconectado";
         statusDot.style.background = connected ? "var(--success)" : "var(--danger)";
         statusDot.style.boxShadow = connected
             ? "0 0 0 4px var(--success-soft)"
             : "0 0 0 4px var(--danger-soft)";
-        btnStart.disabled = connected;
-        btnStop.disabled = !connected;
+        if (!connected) setStatus(false);
+        else refreshButtons();
+    }
+    function setStatus(running) {
+        sessionActive = running;
+        refreshButtons();
+    }
+    function refreshButtons() {
+        btnStart.disabled = sessionActive || countingIn || !wsConnected;
+        btnStop.disabled = !sessionActive && !countingIn;
     }
 
     // ---- tab navigation (UI only) ----
@@ -112,9 +147,12 @@
     async function loadExercises() {
         try {
             const ex = await fetch('/api/exercises').then(r => r.json());
-            exerciseSelect.innerHTML = '<option value="">Choose an exercise</option>';
+            exerciseSelect.innerHTML = '<option value="">Escolha um exercício</option>';
             if (exerciseListEl) exerciseListEl.innerHTML = '';
+            exerciseMeta = {};
             ex.forEach(e => {
+                // /api/exercises currently exposes target_bpm only; start_bpm used if present
+                exerciseMeta[e.id] = { name: e.name, start_bpm: e.start_bpm ?? null, target_bpm: e.target_bpm ?? null };
                 const opt = document.createElement('option');
                 opt.value = e.id;
                 opt.textContent = e.name;
@@ -126,7 +164,7 @@
                     const notes = (e.target_notes || []).join(' ');
                     item.innerHTML = `<div><div class="ex-name">${e.name}</div>
                         <div class="ex-meta">${notes}</div></div>
-                        <div class="ex-meta">${e.target_bpm ?? '—'} BPM · difficulty ${e.difficulty ?? 1}</div>`;
+                        <div class="ex-meta">${e.target_bpm ?? '—'} BPM · dificuldade ${e.difficulty ?? 1}</div>`;
                     item.style.cursor = 'pointer';
                     item.addEventListener('click', () => {
                         exerciseSelect.value = e.id;
@@ -136,6 +174,9 @@
                     exerciseListEl.appendChild(item);
                 }
             });
+            if (!ex.length && exerciseListEl) {
+                exerciseListEl.innerHTML = '<p class="muted">Nenhum exercício encontrado.</p>';
+            }
             if (ex.length) {
                 currentExercise = ex[0].id;
                 exerciseSelect.value = currentExercise;
@@ -147,22 +188,31 @@
 
     async function selectExercise() {
         currentExercise = exerciseSelect.value;
-        if (!currentExercise) return;
+        teacherTempo = null;
+        hideNextBanner();
+        if (!currentExercise) { updateMetronomeBpm(); return; }
         try {
             const e = await fetch(`/api/exercises/${currentExercise}`).then(r => r.json());
+            const meta = exerciseMeta[currentExercise] || {};
+            exerciseMeta[currentExercise] = {
+                name: e.name,
+                start_bpm: e.start_bpm ?? meta.start_bpm ?? null,
+                target_bpm: e.target_bpm ?? meta.target_bpm ?? null,
+            };
             taskNotes = e.target_notes || [];
             exerciseTargetEl.textContent = e.name;
             bpmValueEl.textContent = e.target_bpm ?? "--";
             renderNotePills();
             renderNeck();
         } catch (err) { log(`Exercise load failed: ${err}`); }
+        updateMetronomeBpm();
         loadProgress();
     }
 
     function renderNotePills() {
         progressionEl.innerHTML = '';
         if (!taskNotes.length) {
-            progressionEl.innerHTML = '<span class="empty-state">Select an exercise to begin.</span>';
+            progressionEl.innerHTML = '<span class="empty-state">Selecione um exercício para começar.</span>';
             return;
         }
         taskNotes.forEach((n, i) => {
@@ -196,16 +246,17 @@
         skillListEl.innerHTML = '';
         const names = Object.keys(skills);
         if (!names.length) {
-            skillListEl.innerHTML = '<div class="skill-card"><div class="skill-name">No practice yet</div><div class="skill-value">—</div></div>';
+            skillListEl.innerHTML = '<div class="skill-card"><div class="skill-name">Nenhuma prática ainda</div><div class="skill-value">—</div></div>';
             return;
         }
         const dims = ['note_accuracy', 'timing_accuracy', 'consistency'];
+        const dimLabels = { note_accuracy: 'precisão de notas', timing_accuracy: 'precisão rítmica', consistency: 'consistência' };
         dims.forEach(dim => {
             const card = document.createElement('div');
             card.className = 'skill-card';
             const vals = names.map(n => skills[n][dim]).filter(v => v != null);
             const val = vals.length ? Math.round(average(vals) * 100) + '%' : '—';
-            card.innerHTML = `<div class="skill-name">${dim.replace('_', ' ')}</div><div class="skill-value">${val}</div>`;
+            card.innerHTML = `<div class="skill-name">${dimLabels[dim]}</div><div class="skill-value">${val}</div>`;
             skillListEl.appendChild(card);
         });
     }
@@ -214,13 +265,13 @@
         if (!recentSessionsEl) return;
         recentSessionsEl.innerHTML = '';
         if (!recent.length) {
-            recentSessionsEl.textContent = 'No sessions yet.';
+            recentSessionsEl.textContent = 'Nenhuma sessão ainda.';
             return;
         }
         recent.slice(0, 5).forEach(r => {
             const div = document.createElement('div');
             const name = exercises[r.exercise_id] ? exercises[r.exercise_id].name : r.exercise_id;
-            div.textContent = `${name} — notes ${Math.round((r.note_accuracy || 0) * 100)}% · BPM ${r.performed_bpm ?? '—'}/${r.target_bpm ?? '—'}`;
+            div.textContent = `${name} — notas ${Math.round((r.note_accuracy || 0) * 100)}% · BPM ${r.performed_bpm ?? '—'}/${r.target_bpm ?? '—'}`;
             recentSessionsEl.appendChild(div);
         });
     }
@@ -229,7 +280,7 @@
     function renderNeck() {
         if (!window.Neck || !taskNotes.length) return;
         window.Neck.render(neckEl, taskNotes);
-        neckHintEl.textContent = "Target · Next · Played";
+        neckHintEl.textContent = "Alvo · Próxima · Tocada";
         playedIndex = 0;
         updatePills();
         markNext();
@@ -254,11 +305,11 @@
             if (expected && expected !== note) {
                 matchEl.hidden = false;
                 matchEl.className = 'pitch-match wrong';
-                matchEl.textContent = `You played ${note} — expected ${expected}`;
+                matchEl.textContent = `Você tocou ${note} — esperado ${expected}`;
             } else if (expected === note) {
                 matchEl.hidden = false;
                 matchEl.className = 'pitch-match right';
-                matchEl.textContent = `${note} — correct`;
+                matchEl.textContent = `${note} — correto`;
             } else {
                 matchEl.hidden = true;
             }
@@ -284,7 +335,7 @@
         pitchNoteEl.textContent = note || "--";
         pitchFreqEl.textContent = freq != null ? String(freq) : "--";
         pitchConfEl.textContent = conf != null ? conf.toFixed(2) : "--";
-        pitchOnsetEl.textContent = onset ? "yes" : "no";
+        pitchOnsetEl.textContent = onset ? "sim" : "não";
     }
     function setCents(cents) {
         if (cents == null) { if (pitchCentsValueEl) pitchCentsValueEl.textContent = "--"; return; }
@@ -323,11 +374,16 @@
                 }
                 break;
             case "teacher":
-                teacherActionEl.textContent = data.action || "Ready";
+                teacherActionEl.textContent = data.action || "Pronto";
                 teacherTempoEl.textContent = data.tempo != null ? String(data.tempo) : "--";
                 teacherReasonEl.textContent = data.reason || "--";
                 teacherFeedbackEl.textContent = data.spoken_feedback || "—";
                 teacherSourceEl.textContent = data.source || "--";
+                if (data.tempo != null && Number(data.tempo) > 0) {
+                    teacherTempo = Number(data.tempo);
+                    updateMetronomeBpm();   // scheduler picks it up on the next beat
+                }
+                if (data.spoken_feedback) speak(data.spoken_feedback);
                 bumpEvent();
                 log(`teacher     ${data.action} (${data.source})`);
                 break;
@@ -335,14 +391,15 @@
                 // One attempt closed: show the 4 dims (no score) and reset the guide.
                 const p = data.performance || {};
                 const pct = v => v != null ? Math.round(v * 100) + '%' : '--';
-                neckHintEl.textContent = `Attempt ${data.attempt} · notes ${pct(p.note_accuracy)}`
-                    + ` · timing ${pct(p.timing_accuracy)}`
+                neckHintEl.textContent = `Tentativa ${data.attempt} · notas ${pct(p.note_accuracy)}`
+                    + ` · ritmo ${pct(p.timing_accuracy)}`
                     + (p.performed_bpm != null ? ` · ${Math.round(p.performed_bpm)} BPM` : '');
                 log(`attempt     #${data.attempt} notes=${pct(p.note_accuracy)} timing=${pct(p.timing_accuracy)}`);
                 bumpEvent();
                 playedIndex = 0;
                 markNext();
                 updatePills();
+                checkNext();
                 break;
             }
             case "session_state":
@@ -362,12 +419,18 @@
     // ---- websocket ----
     function connect() {
         ws = new WebSocket(wsUrl);
-        ws.onopen = () => { setStatus(true); log("Connected"); };
+        ws.onopen = () => { setConnection(true); log("Connected"); };
         ws.onmessage = (e) => {
             try { handleMessage(JSON.parse(e.data)); }
             catch (err) { log(`Bad msg: ${err}`); }
         };
-        ws.onclose = (ev) => { setStatus(false); log(`Closed (${ev.code})`); setTimeout(connect, 2500); };
+        ws.onclose = (ev) => {
+            cancelCountIn();
+            stopMetronome();
+            setConnection(false);
+            log(`Closed (${ev.code})`);
+            setTimeout(connect, 2500);
+        };
         ws.onerror = () => log("WS error");
     }
 
@@ -398,25 +461,256 @@
             channel: selectedChannel, sample_rate: 44100, block_size: 1024,
             device: selectedDevice, gain: selectedGain, amplitude_floor: 0.01
         }));
+        setStatus(true);
         log(`Started ${currentExercise} (device ${selectedDevice}, ch ${selectedChannel}, gain x${selectedGain})`);
+    }
+
+    function stopSession() {
+        cancelCountIn();
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "stop_session" }));
+        stopMetronome();
+        setStatus(false);
+        loadProgress();
+    }
+
+    // ---- voice (TTS output only) ----
+    const tts = ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
+    let voiceEnabled = storageGet('riff.voice.enabled') !== '0';
+    let voiceURI = storageGet('riff.voice.uri') || '';
+
+    function pickDefaultVoice(voices) {
+        return voices.find(v => /^pt[-_]BR$/i.test(v.lang || ''))
+            || voices.find(v => /^pt/i.test(v.lang || ''))
+            || voices.find(v => v.default)
+            || null;
+    }
+    function currentVoice() {
+        if (!tts) return null;
+        const voices = tts.getVoices() || [];
+        return voices.find(v => v.voiceURI === voiceURI) || pickDefaultVoice(voices);
+    }
+    function populateVoices() {
+        if (!tts || !voiceSelectEl) return;
+        const voices = tts.getVoices() || [];
+        voiceSelectEl.innerHTML = '';
+        if (!voices.length) {
+            voiceSelectEl.innerHTML = '<option value="">Padrão do sistema</option>';
+            return;
+        }
+        voices.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.voiceURI;
+            opt.textContent = `${v.name} (${v.lang})`;
+            voiceSelectEl.appendChild(opt);
+        });
+        const chosen = currentVoice();
+        if (chosen) voiceSelectEl.value = chosen.voiceURI;
+    }
+    function speak(text) {
+        if (!tts || !voiceEnabled || !text) return;
+        try {
+            tts.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            const v = currentVoice();
+            if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'pt-BR'; }
+            tts.speak(u);
+        } catch (e) { log(`TTS failed: ${e}`); }
+    }
+    function initVoiceSettings() {
+        if (voiceToggleEl) {
+            voiceToggleEl.checked = voiceEnabled;
+            voiceToggleEl.addEventListener('change', () => {
+                voiceEnabled = voiceToggleEl.checked;
+                storageSet('riff.voice.enabled', voiceEnabled ? '1' : '0');
+                if (!voiceEnabled && tts) { try { tts.cancel(); } catch (e) { /* ignore */ } }
+            });
+        }
+        if (!tts) {
+            if (voiceToggleEl) voiceToggleEl.disabled = true;
+            if (voiceSelectEl) voiceSelectEl.disabled = true;
+            if (voiceNoteEl) voiceNoteEl.textContent = 'Síntese de voz não suportada neste navegador.';
+            return;
+        }
+        if (voiceSelectEl) {
+            voiceSelectEl.addEventListener('change', () => {
+                voiceURI = voiceSelectEl.value;
+                storageSet('riff.voice.uri', voiceURI);
+            });
+        }
+        populateVoices();
+        if (typeof tts.addEventListener === 'function') tts.addEventListener('voiceschanged', populateVoices);
+        else tts.onvoiceschanged = populateVoices;
+    }
+
+    // ---- metronome (Web Audio OUTPUT only, lookahead scheduler) ----
+    const LOOKAHEAD_MS = 25;
+    const SCHEDULE_AHEAD_S = 0.1;
+    let audioCtx = null;
+    let metronomeOn = false;
+    let metronomeTimer = null;
+    let nextClickTime = 0;
+    let beatIndex = 0;
+    let countInTimers = [];
+
+    function getAudioCtx() {
+        if (!audioCtx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            try { audioCtx = new AC(); } catch (e) { log(`AudioContext failed: ${e}`); return null; }
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+    function metronomeBpm() {
+        const meta = exerciseMeta[currentExercise] || {};
+        const bpm = teacherTempo ?? meta.start_bpm ?? meta.target_bpm ?? 60;
+        return Math.max(20, Math.min(300, Number(bpm) || 60));
+    }
+    function updateMetronomeBpm() {
+        if (metronomeBpmEl) metronomeBpmEl.textContent = String(Math.round(metronomeBpm()));
+    }
+    function scheduleClick(time, accent) {
+        const ctx = audioCtx;
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const env = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = accent ? 1600 : 1000;
+        env.gain.setValueAtTime(0.0001, time);
+        env.gain.exponentialRampToValueAtTime(accent ? 0.35 : 0.2, time + 0.002);
+        env.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+        osc.connect(env);
+        env.connect(ctx.destination);
+        osc.start(time);
+        osc.stop(time + 0.06);
+    }
+    function metronomeTick() {
+        if (!audioCtx) return;
+        while (nextClickTime < audioCtx.currentTime + SCHEDULE_AHEAD_S) {
+            scheduleClick(nextClickTime, beatIndex % 4 === 0);
+            nextClickTime += 60 / metronomeBpm();   // reads live tempo every beat
+            beatIndex++;
+        }
+    }
+    function runScheduler(startTime) {
+        clearInterval(metronomeTimer);
+        beatIndex = 0;
+        nextClickTime = startTime;
+        metronomeTimer = setInterval(metronomeTick, LOOKAHEAD_MS);
+        metronomeTick();
+    }
+    function syncMetronomeUI() {
+        if (!btnMetronome) return;
+        btnMetronome.classList.toggle('active', metronomeOn);
+        btnMetronome.setAttribute('aria-pressed', metronomeOn ? 'true' : 'false');
+        const label = btnMetronome.querySelector('.metro-label');
+        if (label) label.textContent = metronomeOn ? 'LIGADO' : 'DESLIGADO';
+    }
+    function startMetronome() {
+        const ctx = getAudioCtx();
+        if (!ctx) { log('Web Audio not available'); return; }
+        metronomeOn = true;
+        if (!countingIn) runScheduler(ctx.currentTime + 0.05);
+        syncMetronomeUI();
+    }
+    function stopMetronome() {
+        metronomeOn = false;
+        clearInterval(metronomeTimer);
+        metronomeTimer = null;
+        syncMetronomeUI();
+    }
+
+    // ---- count-in (3-2-1 at metronome tempo) ----
+    function showCountNumber(n) {
+        if (!countInNumberEl) return;
+        countInNumberEl.textContent = String(n);
+        countInNumberEl.classList.remove('pulse');
+        void countInNumberEl.offsetWidth;   // restart CSS animation
+        countInNumberEl.classList.add('pulse');
+    }
+    function cancelCountIn() {
+        countInTimers.forEach(t => clearTimeout(t));
+        countInTimers = [];
+        if (countInEl) countInEl.hidden = true;
+        if (countingIn) { countingIn = false; refreshButtons(); }
+    }
+    function runCountIn(onDone) {
+        const beat = 60 / metronomeBpm();
+        const ctx = getAudioCtx();
+        const lead = 0.05;
+        const t0 = ctx ? ctx.currentTime + lead : 0;
+        countingIn = true;
+        refreshButtons();
+        clearInterval(metronomeTimer);   // pause regular clicks during count-in
+        if (countInEl) countInEl.hidden = false;
+        [3, 2, 1].forEach((n, i) => {
+            if (ctx) scheduleClick(t0 + i * beat, i === 0);
+            countInTimers.push(setTimeout(() => showCountNumber(n), (lead + i * beat) * 1000));
+        });
+        countInTimers.push(setTimeout(() => {
+            countInTimers = [];
+            countingIn = false;
+            if (countInEl) countInEl.hidden = true;
+            if (metronomeOn && ctx) runScheduler(t0 + 3 * beat);   // continue on the same grid
+            refreshButtons();
+            onDone();
+        }, (lead + 3 * beat) * 1000));
+    }
+
+    // ---- progression (/api/next) ----
+    function hideNextBanner() {
+        pendingNextExercise = null;
+        if (nextBannerEl) nextBannerEl.hidden = true;
+    }
+    async function checkNext() {
+        const current = currentExercise;
+        if (!current || !nextBannerEl) return;
+        try {
+            const r = await fetch(`/api/next?current=${encodeURIComponent(current)}`);
+            if (!r.ok) return;   // endpoint missing (404) or error: stay silent
+            const d = await r.json();
+            if (current !== currentExercise) return;   // exercise changed meanwhile
+            if (d && d.mastered && d.next_exercise_id && d.next_exercise_id !== current) {
+                pendingNextExercise = d.next_exercise_id;
+                const meta = exerciseMeta[d.next_exercise_id];
+                nextNameEl.textContent = meta ? meta.name : d.next_exercise_id;
+                nextReasonEl.textContent = d.reason || '';
+                nextReasonEl.hidden = !d.reason;
+                nextBannerEl.hidden = false;
+            } else {
+                hideNextBanner();
+            }
+        } catch (e) { /* network/parse error: silent */ }
+    }
+    function goToNextExercise() {
+        const id = pendingNextExercise;
+        if (!id) return;
+        stopSession();
+        exerciseSelect.value = id;
+        if (exerciseSelect.value !== id) { log(`Next exercise not in list: ${id}`); return; }
+        selectExercise();
+        showView('coach');
     }
 
     // ---- controls ----
     exerciseSelect.addEventListener('change', selectExercise);
-    btnStart.addEventListener('click', startSession);
-    btnStop.addEventListener('click', () => {
-        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "stop_session" }));
-        setStatus(false);
-        loadProgress();
+    btnStart.addEventListener('click', () => {
+        if (!ws || ws.readyState !== WebSocket.OPEN || countingIn || sessionActive) return;
+        runCountIn(startSession);
     });
+    btnStop.addEventListener('click', stopSession);
+    if (btnMetronome) btnMetronome.addEventListener('click', () => {
+        if (metronomeOn) stopMetronome(); else startMetronome();
+    });
+    if (btnNext) btnNext.addEventListener('click', goToNextExercise);
 
     // gain selector (session bar) — appended as before: preserved contract
     const gainWrap = document.createElement('div');
     gainWrap.className = 'session-exercise';
-    gainWrap.innerHTML = `<label for="gain-select">SENSITIVITY</label>
+    gainWrap.innerHTML = `<label for="gain-select">SENSIBILIDADE</label>
         <select id="gain-select" class="gain-select">
             <option value="1">×1</option><option value="2">×2</option>
-            <option value="4" selected>×4 (recommended)</option>
+            <option value="4" selected>×4 (recomendado)</option>
             <option value="8">×8</option><option value="16">×16</option>
         </select>`;
     document.getElementById('session-controls').appendChild(gainWrap);
@@ -437,7 +731,10 @@
     }
 
     // init
-    setStatus(false);
+    setConnection(false);
+    initVoiceSettings();
+    syncMetronomeUI();
+    updateMetronomeBpm();
     connect();
     loadExercises();
     loadDevices();

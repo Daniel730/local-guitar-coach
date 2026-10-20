@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Riff — local adaptive guitar coach">
-    <title>Riff — Guitar Coach</title>
+    <meta name="description" content="Riff — professor de guitarra local e adaptativo">
+    <title>Riff — Professor de Guitarra</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,17 +24,26 @@
         </a>
 
         <nav class="topnav" id="topnav">
-            <button type="button" class="nav-item active" data-nav="coach">Coach</button>
-            <button type="button" class="nav-item" data-nav="progress">Progress</button>
-            <button type="button" class="nav-item" data-nav="exercises">Exercises</button>
-            <button type="button" class="nav-item" data-nav="settings">Settings</button>
+            <button type="button" class="nav-item active" data-nav="coach">Professor</button>
+            <button type="button" class="nav-item" data-nav="progress">Progresso</button>
+            <button type="button" class="nav-item" data-nav="exercises">Exercícios</button>
+            <button type="button" class="nav-item" data-nav="settings">Ajustes</button>
         </nav>
 
         <div class="connection-status" id="status">
             <span class="status-dot"></span>
-            <span>Disconnected</span>
+            <span>Desconectado</span>
         </div>
     </header>
+
+    <!-- ===== PROGRESSION BANNER (shown when /api/next reports mastery) ===== -->
+    <section class="next-banner" id="next-banner" role="status" hidden>
+        <div class="next-text">
+            <div class="next-title">Exercício dominado! Próximo: <strong id="next-name">—</strong></div>
+            <p class="next-reason" id="next-reason" hidden></p>
+        </div>
+        <button id="btn-next" class="button button-primary" type="button">Próximo exercício</button>
+    </section>
 
     <!-- ===== COACH VIEW ===== -->
     <main class="main-grid view" id="view-coach">
@@ -42,22 +51,22 @@
         <!-- LEFT: current exercise + next notes -->
         <section class="coach-left" id="session-exercise">
 
-            <div class="eyebrow">CURRENT EXERCISE</div>
-            <h1 id="exercise-target">Choose an exercise</h1>
+            <div class="eyebrow">EXERCÍCIO ATUAL</div>
+            <h1 id="exercise-target">Escolha um exercício</h1>
 
             <div class="bpm-block">
                 <span class="bpm-value" id="current-task">—</span>
                 <span class="bpm-label">BPM</span>
             </div>
 
-            <div class="task-label">NEXT NOTES</div>
+            <div class="task-label">PRÓXIMAS NOTAS</div>
             <div class="note-sequence" id="progression">
-                <span class="empty-state">Select an exercise to begin.</span>
+                <span class="empty-state">Selecione um exercício para começar.</span>
             </div>
 
             <div class="pattern-row">
-                <span class="pattern-name">PATTERN</span>
-                <span class="pattern-value">Ascending</span>
+                <span class="pattern-name">PADRÃO</span>
+                <span class="pattern-value">Ascendente</span>
             </div>
 
         </section>
@@ -66,21 +75,21 @@
         <section class="neck-card">
 
             <div class="section-header">
-                <div class="eyebrow">FRETBOARD</div>
+                <div class="eyebrow">BRAÇO</div>
                 <div class="neck-legend">
-                    <span class="legend-item"><span class="legend-dot target"></span>target</span>
-                    <span class="legend-item"><span class="legend-dot next"></span>next</span>
-                    <span class="legend-item"><span class="legend-dot current"></span>played</span>
+                    <span class="legend-item"><span class="legend-dot target"></span>alvo</span>
+                    <span class="legend-item"><span class="legend-dot next"></span>próxima</span>
+                    <span class="legend-item"><span class="legend-dot current"></span>tocada</span>
                 </div>
             </div>
 
             <div class="neck-wrap">
-                <div class="neck-container" id="neck" aria-label="Guitar fretboard">
+                <div class="neck-container" id="neck" aria-label="Braço da guitarra">
                     <!-- neck.js injects the SVG here -->
                 </div>
             </div>
 
-            <p class="neck-hint" id="neck-hint">Waiting for session</p>
+            <p class="neck-hint" id="neck-hint">Aguardando sessão</p>
 
         </section>
 
@@ -90,8 +99,8 @@
             <div class="pitch-card">
 
                 <div class="section-header compact">
-                    <div class="eyebrow">LIVE INPUT</div>
-                    <div class="input-state"><span class="input-state-dot"></span>Listening</div>
+                    <div class="eyebrow">ENTRADA AO VIVO</div>
+                    <div class="input-state"><span class="input-state-dot"></span>Ouvindo</div>
                 </div>
 
                 <div class="pitch-main">
@@ -107,8 +116,8 @@
                 </div>
 
                 <div class="pitch-metadata">
-                    <div class="metric"><span class="metric-label">Confidence</span><strong id="pitch-confidence">—</strong></div>
-                    <div class="metric"><span class="metric-label">Onset</span><strong id="pitch-onset">—</strong></div>
+                    <div class="metric"><span class="metric-label">Confiança</span><strong id="pitch-confidence">—</strong></div>
+                    <div class="metric"><span class="metric-label">Ataque</span><strong id="pitch-onset">—</strong></div>
                 </div>
 
                 <div class="channel-meters">
@@ -128,18 +137,18 @@
             <div class="teacher-card">
 
                 <div class="section-header compact">
-                    <div class="eyebrow">RIFF COACH</div>
+                    <div class="eyebrow">PROFESSOR RIFF</div>
                     <div class="teacher-source" id="teacher-source">—</div>
                 </div>
 
                 <div class="teacher-action-area">
-                    <div class="teacher-action" id="teacher-action">Ready</div>
+                    <div class="teacher-action" id="teacher-action">Pronto</div>
                     <div class="teacher-tempo"><span id="teacher-tempo">—</span><span class="unit">BPM</span></div>
                 </div>
 
-                <p class="teacher-feedback" id="teacher-feedback">Start a session and I'll listen to your playing.</p>
+                <p class="teacher-feedback" id="teacher-feedback">Inicie uma sessão e eu vou ouvir você tocar.</p>
 
-                <div class="teacher-reason"><span>WHY</span><p id="teacher-reason">—</p></div>
+                <div class="teacher-reason"><span>POR QUÊ</span><p id="teacher-reason">—</p></div>
 
             </div>
 
@@ -151,13 +160,13 @@
     <main class="view" id="view-progress" hidden>
         <section class="progress-card card">
             <div class="section-header">
-                <div class="eyebrow">PROGRESS</div>
-                <h2>Your practice</h2>
+                <div class="eyebrow">PROGRESSO</div>
+                <h2>Sua prática</h2>
             </div>
             <div class="skill-list" id="skill-list"></div>
             <div class="recent">
-                <div class="recent-title">RECENT SESSIONS</div>
-                <div id="recent-sessions">No sessions yet.</div>
+                <div class="recent-title">SESSÕES RECENTES</div>
+                <div id="recent-sessions">Nenhuma sessão ainda.</div>
             </div>
         </section>
     </main>
@@ -166,11 +175,11 @@
     <main class="view" id="view-exercises" hidden>
         <section class="progress-card card">
             <div class="section-header">
-                <div class="eyebrow">EXERCISES</div>
-                <h2>Choose what to practice</h2>
+                <div class="eyebrow">EXERCÍCIOS</div>
+                <h2>Escolha o que praticar</h2>
             </div>
             <div class="exercise-list" id="exercise-list">
-                <p class="muted">Loading exercises…</p>
+                <p class="muted">Carregando exercícios…</p>
             </div>
         </section>
     </main>
@@ -179,15 +188,38 @@
     <main class="view" id="view-settings" hidden>
         <section class="progress-card card">
             <div class="section-header">
-                <div class="eyebrow">SETTINGS</div>
-                <h2>Input</h2>
+                <div class="eyebrow">AJUSTES</div>
+                <h2>Entrada</h2>
             </div>
             <div class="settings-body">
                 <div class="pattern-row">
-                    <span class="pattern-name">GAIN</span>
+                    <span class="pattern-name">GANHO</span>
                     <span class="gain-options" id="settings-gain"></span>
                 </div>
-                <p class="muted">Audio capture runs on the local device (M-Track) in the backend.</p>
+                <p class="muted">A captura de áudio roda no dispositivo local (M-Track), no backend.</p>
+            </div>
+        </section>
+
+        <section class="progress-card card settings-voice">
+            <div class="section-header">
+                <div class="eyebrow">VOZ</div>
+                <h2>Feedback falado</h2>
+            </div>
+            <div class="settings-body">
+                <label class="switch-row" for="settings-voice-enabled">
+                    <span class="pattern-name">VOZ DO PROFESSOR</span>
+                    <span class="switch">
+                        <input type="checkbox" id="settings-voice-enabled" checked>
+                        <span class="switch-track" aria-hidden="true"></span>
+                    </span>
+                </label>
+                <div class="settings-field">
+                    <label class="pattern-name" for="settings-voice">VOZ</label>
+                    <select id="settings-voice">
+                        <option value="">Padrão do sistema</option>
+                    </select>
+                </div>
+                <p class="muted" id="settings-voice-note">O professor lê o feedback em voz alta usando a síntese de voz do navegador.</p>
             </div>
         </section>
     </main>
@@ -196,18 +228,28 @@
     <section class="session-bar" id="session-controls">
 
         <div class="session-exercise">
-            <label for="exercise-select">EXERCISE</label>
+            <label for="exercise-select">EXERCÍCIO</label>
             <select id="exercise-select">
-                <option value="">Choose an exercise</option>
+                <option value="">Escolha um exercício</option>
             </select>
+        </div>
+
+        <div class="session-metronome">
+            <label for="btn-metronome">METRÔNOMO</label>
+            <div class="metro-row">
+                <button id="btn-metronome" class="button button-secondary metro-toggle" type="button" aria-pressed="false">
+                    <span class="button-icon">♩</span><span class="metro-label">DESLIGADO</span>
+                </button>
+                <span class="metro-bpm"><span id="metronome-bpm">—</span><span class="unit">BPM</span></span>
+            </div>
         </div>
 
         <div class="session-actions">
             <button id="btn-start" class="button button-primary" type="button">
-                <span class="button-icon">▶</span>START
+                <span class="button-icon">▶</span>INICIAR
             </button>
             <button id="btn-stop" class="button button-secondary" type="button" disabled>
-                <span class="button-icon">■</span>STOP
+                <span class="button-icon">■</span>PARAR
             </button>
         </div>
 
@@ -218,21 +260,26 @@
         <details>
             <summary>
                 <span class="diagnostics-icon">▸</span>
-                EVENT LOG
-                <span class="diagnostics-description" id="event-log-count">0 events</span>
+                LOG DE EVENTOS
+                <span class="diagnostics-description" id="event-log-count">0 eventos</span>
             </summary>
             <div class="debug-panel">
                 <div class="debug-toolbar">
-                    <span>WEBSOCKET TELEMETRY</span>
-                    <span class="debug-live"><span></span>live</span>
+                    <span>TELEMETRIA WEBSOCKET</span>
+                    <span class="debug-live"><span></span>ao vivo</span>
                 </div>
                 <pre id="debug-log"></pre>
             </div>
         </details>
     </section>
 
-    <footer class="footer"><span>RIFF</span><span>Local · Private · Adaptive</span></footer>
+    <footer class="footer"><span>RIFF</span><span>Local · Privado · Adaptativo</span></footer>
 
+</div>
+
+<!-- ===== COUNT-IN OVERLAY (3-2-1 before start_session) ===== -->
+<div class="countin-overlay" id="countin-overlay" aria-live="assertive" hidden>
+    <span class="countin-number" id="countin-number"></span>
 </div>
 
 <script src="/neck.js" defer></script>
