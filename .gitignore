@@ -11,3 +11,4 @@ data/sessions/
 # Local scratch
 _inspect_*.py
 nul
+.claude/worktrees/
