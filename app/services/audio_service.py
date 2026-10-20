@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 
 # Log every Nth block's meter to avoid spamming (1024 blocks ≈ 23ms each).
 METER_LOG_EVERY = 200  # ~4.6s at 44100/1024
+# The engine returns None for silence, so the tracker never sees a note end.
+# After this many silent blocks (~116 ms) we tell it explicitly.
+SILENCE_BLOCKS_TO_CLOSE = 5
 
 
 @dataclass
@@ -35,6 +38,16 @@ class AudioConfig:
     channels: int = 2        # open stereo, select in callback
     gain: float = 4.0        # digital gain (×) applied before perception
     amplitude_floor: float = 0.01   # perception amp floor (-40dBFS); below-noise rejection
+
+
+@dataclass
+class _Silence:
+    """Pitchless event: the EventTracker closes the open note on note=None."""
+    timestamp: float
+    note: Optional[str] = None
+    midi: Optional[int] = None
+    confidence: float = 0.0
+    onset: bool = False
 
 
 class AudioService:
@@ -74,6 +87,7 @@ class AudioService:
         self._tracker.reset()
         self.blocks_processed = 0
         self._max_peak = 0.0
+        self._silent_blocks = 0
 
         cfg = _PortAudioConfig(
             device=self.config.device,
@@ -103,6 +117,7 @@ class AudioService:
             g = self.config.gain
             block64 = block.astype(np.float64) * g
             ev = self._engine.process_block(block64)
+            self._track_silence(block64)
             if ev is not None:
                 logger.info("[audio] pitch note=%s freq=%.2f conf=%.2f onset=%s",
                             ev.note, ev.frequency, ev.confidence, ev.onset)
@@ -125,6 +140,21 @@ class AudioService:
         except Exception as e:
             logger.exception("[audio] FAILED to start capture: %s", e)
             raise
+
+    def _track_silence(self, block64: np.ndarray) -> None:
+        """Close the open note once the input has been silent for a few blocks."""
+        if float(np.sqrt(np.mean(block64 ** 2))) >= self.config.amplitude_floor:
+            self._silent_blocks = 0
+            return
+        self._silent_blocks += 1
+        if self._silent_blocks != SILENCE_BLOCKS_TO_CLOSE:
+            return
+        t = self.blocks_processed * self.config.block_size / self.config.sample_rate
+        closed = self._tracker.process(_Silence(timestamp=t))
+        if closed is not None:
+            logger.info("[audio] note_event %s (closed by silence)", closed.note)
+            if self.on_note_event:
+                self.on_note_event(closed)
 
     def stop(self) -> None:
         logger.info("[audio] stop (blocks=%s)", self.blocks_processed)
