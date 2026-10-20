@@ -138,7 +138,8 @@ class SessionService:
         teacher_svc = self._teacher_services.get(session_id)
         if not teacher_svc:
             return []
-        teacher_svc.close_attempt()
+        if teacher_svc.close_attempt() is None:
+            return []  # too short to be an attempt
         state = self.persist_session(session_id)
         msgs = [{
             "type": "attempt_result",

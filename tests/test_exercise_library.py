@@ -33,3 +33,10 @@ def test_collapse_repeats_only_for_songs():
     assert exercise_from_dict(base).expected_sequence == ["E3", "E3", "F3", "E3"]
     song = exercise_from_dict({**base, "rules": {"collapse_repeats": True}})
     assert song.expected_sequence == ["E3", "F3", "E3"]
+
+
+def test_api_shows_full_song_melody():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    e = TestClient(app).get("/api/exercises/song_twinkle_a").json()
+    assert e["target_notes"][:2] == ["C3", "C3"]

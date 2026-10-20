@@ -395,7 +395,8 @@
                 teacherReasonEl.textContent = data.reason || "--";
                 teacherFeedbackEl.textContent = data.spoken_feedback || "—";
                 teacherSourceEl.textContent = data.source || "--";
-                if (data.tempo != null && Number(data.tempo) > 0) {
+                if (data.tempo != null && Number(data.tempo) > 0
+                        && (!data.exercise_id || data.exercise_id === currentExercise)) {
                     teacherTempo = Number(data.tempo);
                     updateMetronomeBpm();   // scheduler picks it up on the next beat
                 }

@@ -83,8 +83,39 @@ def test_session_close_attempt_emits_result_and_teacher(tmp_path, monkeypatch):
 def test_stop_evaluates_unfinished_attempt_without_teacher(tmp_path, monkeypatch):
     svc, sid = _service_with_session(tmp_path, monkeypatch)
     teacher = svc.get_teacher_service(sid)
-    teacher.add_note_event(_ne("E2", 0.0))
-    teacher.add_note_event(_ne("G2", 0.6))
+    for i, n in enumerate(TARGET[:3]):          # half the notes: still an attempt
+        teacher.add_note_event(_ne(n, i * 0.6))
     assert svc.stop_session(sid)
     assert teacher._last_decision is None      # no LLM call on stop
     assert (tmp_path / f"{sid}_a1.json").exists()
+
+
+def test_stray_note_does_not_close_attempt_early():
+    t = _teacher()
+    for i, n in enumerate(["E2", "G2", "G#2", "A2", "B2", "D3"]):  # slip, E3 not yet played
+        t.add_note_event(_ne(n, i * 0.6))
+    assert not t.attempt_ready(now=time.monotonic())
+    t.add_note_event(_ne("E3", 4.2))
+    assert t.attempt_ready()
+
+
+def test_too_short_attempt_is_discarded(tmp_path, monkeypatch):
+    svc, sid = _service_with_session(tmp_path, monkeypatch)
+    teacher = svc.get_teacher_service(sid)
+    teacher.add_note_event(_ne("E2", 0.0))     # testing the sound
+    assert svc.close_attempt(sid) == []
+    assert teacher.attempt_count == 0 and not teacher.has_pending_notes()
+    assert not list(tmp_path.glob("*.json"))
+
+
+def test_song_attempt_counts_collapsed_notes():
+    t = TeacherService(exercise_id="song_twinkle_a", fail_ollama=True)
+    melody = "C3 C3 G3 G3 A3 A3 G3 F3 F3 E3 E3 D3 D3 C3".split()
+    for i, n in enumerate(melody[:8]):        # re-strikes arrive as separate events
+        t.add_note_event(_ne(n, i * 0.6))
+    assert not t.attempt_ready(now=time.monotonic())
+    for i, n in enumerate(melody[8:], start=8):
+        t.add_note_event(_ne(n, i * 0.6))
+    assert t.attempt_ready()
+    t.close_attempt()
+    assert t._performance.note_accuracy == 1.0

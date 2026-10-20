@@ -49,22 +49,17 @@ class TeacherService:
             self.provider = OllamaProvider(model=ollama_model,
                                            think=os.environ.get("RIFF_OLLAMA_THINK") or None)
 
-        # Policy — tempo bounds come from the exercise definition.
-        # The whole curriculum is offered, so a teacher START_EXERCISE
-        # suggestion is validated against real bounds/prerequisites.
-        from exercises.curriculum import list_exercises
-        curriculum = {e.id: e for e in list_exercises()}
-        curriculum[exercise_id] = self.exercise
-        self.available_exercise_ids = list(curriculum)
+        # Policy — tempo bounds come from the exercise definition. Only the
+        # current exercise is offered: progression is decided by /api/next
+        # (exercises/curriculum.py), so the teacher cannot jump elsewhere.
         self.policy = PolicyValidator(
             available_exercises={
-                ex.id: {
-                    "start_bpm": ex.start_bpm,
-                    "target_bpm": ex.target_bpm,
+                exercise_id: {
+                    "start_bpm": self.exercise.start_bpm,
+                    "target_bpm": self.exercise.target_bpm,
                     "enabled": True,
-                    "prerequisites": list(ex.prerequisites),
+                    "prerequisites": [],
                 }
-                for ex in curriculum.values()
             },
             session_active=True,
             time_remaining_s=600.0,
@@ -95,12 +90,21 @@ class TeacherService:
         with self._lock:
             return bool(self._note_events)
 
+    def _collapse(self, notes: List[NoteEvent]) -> List[NoteEvent]:
+        """Songs: a muted re-strike arrives as 2 events but expected_sequence has 1."""
+        if not self.exercise.rules.get("collapse_repeats"):
+            return notes
+        return [n for i, n in enumerate(notes) if i == 0 or n.note != notes[i - 1].note]
+
     def attempt_ready(self, now: Optional[float] = None) -> bool:
-        """True when the current attempt is complete (all notes or silence)."""
+        """True when the attempt is complete: all notes ending on the final
+        target note, or silence. A stray extra note must not close it early."""
+        expected = self.exercise.expected_sequence
         with self._lock:
             if not self._note_events:
                 return False
-            if len(self._note_events) >= len(self.exercise.expected_sequence):
+            played = self._collapse(self._note_events)
+            if len(played) >= len(expected) and played[-1].note == expected[-1]:
                 return True
             now = time.monotonic() if now is None else now
             return now - (self._last_note_at or now) >= self.attempt_silence_s
@@ -111,28 +115,31 @@ class TeacherService:
             self._last_note_at = None
         return notes
 
-    def evaluate_pending(self) -> Optional[PerformanceResult]:
-        """Evaluate buffered notes WITHOUT asking the teacher (used on stop)."""
+    def _take_attempt(self) -> Optional[List[NoteEvent]]:
+        """Clear the buffer; None when it holds fewer than half the expected
+        notes (testing the sound or tuning is not an attempt)."""
         notes = self._take_notes()
-        if not notes:
+        if 2 * len(self._collapse(notes)) < len(self.exercise.expected_sequence):
             return None
         self.attempt_count += 1
-        return self._evaluate(notes)
+        return notes
 
-    def close_attempt(self) -> TeacherDecision:
-        """Evaluate the buffered attempt, ask the teacher once, clear the buffer."""
-        notes = self._take_notes()
-        self.attempt_count += 1
-        return self.evaluate_and_decide(notes)
+    def evaluate_pending(self) -> Optional[PerformanceResult]:
+        """Evaluate buffered notes WITHOUT asking the teacher (used on stop)."""
+        notes = self._take_attempt()
+        return self._evaluate(notes) if notes else None
+
+    def close_attempt(self) -> Optional[TeacherDecision]:
+        """Evaluate the buffered attempt and ask the teacher once; None if discarded."""
+        notes = self._take_attempt()
+        return self.evaluate_and_decide(notes) if notes else None
 
     def _evaluate(self, notes: List[NoteEvent]) -> PerformanceResult:
         """compare -> performance for one attempt."""
         # Tempo from the exercise definition (CHANGE-05).
         target_bpm = self.exercise.target_bpm
         subdivision = self.exercise.subdivision
-        if self.exercise.rules.get("collapse_repeats"):
-            # Match expected_sequence: a muted re-strike still arrives as 2 events.
-            notes = [n for i, n in enumerate(notes) if i == 0 or n.note != notes[i - 1].note]
+        notes = self._collapse(notes)
 
         # Compare
         self._comparison = compare(
@@ -159,11 +166,8 @@ class TeacherService:
         self.performance_persisted = False
         return self._performance
 
-    def evaluate_and_decide(self, notes: Optional[List[NoteEvent]] = None) -> TeacherDecision:
+    def evaluate_and_decide(self, notes: List[NoteEvent]) -> TeacherDecision:
         """Run the full pipeline: compare -> performance -> context -> teacher."""
-        if notes is None:
-            with self._lock:
-                notes = list(self._note_events)
         self._evaluate(notes)
         target_bpm = self.exercise.target_bpm
         start_bpm = self.exercise.start_bpm
@@ -173,7 +177,7 @@ class TeacherService:
             student_profile={"experience": "beginner", "goals": ["rock"], "practice_minutes": 30},
             exercise={"id": self.exercise_id, "start_bpm": start_bpm, "target_bpm": target_bpm},
             performance=self._performance,
-            available_exercises=list(self.available_exercise_ids),
+            available_exercises=[self.exercise_id],
             voice_mode="COACH",
         )
         ctx.rendered = json.dumps(ctx.to_dict(), ensure_ascii=False)

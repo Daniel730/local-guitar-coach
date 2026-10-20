@@ -30,7 +30,7 @@ async def list_exercises() -> List[ExerciseInfo]:
         ExerciseInfo(
             id=ex.id,
             name=ex.name,
-            target_notes=ex.expected_sequence,
+            target_notes=ex.target_notes,  # full melody for display; scoring uses expected_sequence
             difficulty=ex.difficulty,
             target_bpm=ex.target_bpm,
             start_bpm=ex.start_bpm,
@@ -50,7 +50,7 @@ async def get_exercise(exercise_id: str) -> ExerciseInfo:
         return ExerciseInfo(
             id=ex.id,
             name=ex.name,
-            target_notes=ex.expected_sequence,
+            target_notes=ex.target_notes,  # full melody for display; scoring uses expected_sequence
             difficulty=ex.difficulty,
             target_bpm=ex.target_bpm,
         )
