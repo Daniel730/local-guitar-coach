@@ -38,8 +38,8 @@ Python + `sounddevice`/PortAudio + NumPy + FastAPI + SQLite + **Ollama**.
 | MVP-3 | SequenceMatcher / alignment (`perception/sequence.py`) | ✅ DONE |
 | MVP-4 | PerformanceEvaluator, 4 dims sem score (`perception/performance.py`, `skill.py`) | ✅ DONE |
 | MVP-5 | Teacher brain: Ollama + Schema + Policy (`ai/teacher/*`) | ✅ DONE (portão full validation v2 PASS) |
-| **MVP-6** | **Web App (FastAPI + WebSocket + frontend vanilla)** | ⛔ **ABERTO — não declarar DONE até §4 passar** |
-| MVP-7 | UX/pedagogia (próximo, ver §6) | ⏸ agendado depois do gate |
+| **MVP-6** | **Web App (FastAPI + WebSocket + frontend vanilla)** | 🟡 **passos 1-4, 6 PASS (2026-10-20); falta 5 (guitarra real) e 7** |
+| MVP-7 v1 | Loop por tentativas, currículo, músicas, voz, launcher (ver §11) | 🟡 implementado; aguarda teste humano |
 
 Núcleo de percepção (MVP-0..MVP-5) está **FROZEN**: validado, não mexer.
 
@@ -198,7 +198,8 @@ Se uma mudança em `perception/` não atender a isso: bloquear, não integrar.
 ajuste do nível, curvas de exercícios), NÃO por features novas de técnica.
 
 **Adiado — não agendar antes do gate:** bends, vibrato, reconhecimento de
-acordes, identificação de corda, palm mute, scoring/performance model, músicas.
+acordes, identificação de corda, palm mute, scoring/performance model.
+**Músicas: AGENDADAS pelo dono em 2026-10-20** (melodias de domínio público, nota única; ver §11).
 
 ## 7. Regras de engenharia do dono (Dan — vinculantes) [CAPITAL GATE]
 
@@ -307,6 +308,30 @@ python -m audio_probe --list                   # descobrir índice do device
 > **P1-A, P1-B, P2-A, P2-B, P2-C foram implementados (CHANGE-03..06).**
 > O único item aberto é P2-D (CHANGE-07), aguardando hardware. Reabrir um item
 > fechado = CHANGE separado, com protocolo CHANGE do dono (diagnóstico → proposta → GO).
+
+## 11. v1 utilizável (2026-10-20, branch `feat/v1-usable`)
+
+Decisões do dono: escopo v1 = loop de prática completo + músicas; delegação de desenvolvimento
+ao LiteLLM permitida (o runtime continua só-Ollama).
+
+| Item | Onde | Evidência |
+|---|---|---|
+| Gate 1-2: fonte sintética → percepção → WS (pitch/meter/note_event) | `tests/test_e2e_synthetic.py` | PASS (pytest) |
+| Gate 3: TeacherAction `source=llm` com Ollama real | gpt-oss:20b, think=low, 8,2 s, feedback pt-BR citando 83,3%/33,3% | PASS (manual) |
+| Gate 4: Ollama indisponível → fallback, sessão viva | `test_e2e_synthetic.py`, `test_attempts.py` | PASS |
+| Gate 6: suíte | `pytest` | **174 passed, 1 skipped** |
+| Uma decisão do professor por tentativa (não mais a cada 3 s) | `app/services/teacher_service.py`, `websocket.py` | `tests/test_attempts.py` |
+| Nota final de tentativa fechava só na próxima nota | `AudioService._track_silence` (app, não perception) | e2e |
+| `ollama` faltava no `.venv`/requirements → web app sempre em fallback | `requirements.txt` | corrigido |
+| Fallback com exercício inexistente e 90 BPM fixo | `TeacherService` | corrigido |
+| Currículo determinístico + `GET /api/next` | `exercises/curriculum.py` | `tests/test_curriculum.py` |
+| 12 exercícios + 5 músicas (frases + completa) | `exercises/*.json` | `tests/test_exercise_library.py` |
+| Músicas: notas repetidas colapsadas (`rules.collapse_repeats`) porque o EventTracker funde re-ataque da mesma nota | `Exercise.expected_sequence` | teste |
+| Voz (speechSynthesis pt-BR), metrônomo, contagem 3-2-1, banner de progressão | `frontend/` | `node --check` + preview |
+| Launcher | `start.bat` / `start.ps1` | preview |
+
+**Pendente (precisa do Dan + guitarra):** gate 5 (tocar `scale_e_minor_001` e uma frase de música
+via CH2) e gate 7 (registrar em `validation/session_007/`). Roteiro em `docs/MANUAL_TEST.md` §v1.
 
 ---
 

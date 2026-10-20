@@ -99,3 +99,16 @@ M-Track
 
 Comparar direto vs. Cube Baby para medir quanto os efeitos prejudicam ou
 melhoram a deteção de pitch.
+
+---
+
+## §v1 — Teste humano do app (gate MVP-6 passo 5 + smoke v1)
+
+1. Guitarra → Cuvave → **CH2** da M-Track; duplo clique em `start.bat`.
+2. No log do app (painel Diagnóstico): `Device: ... M-Track ... → channel 1`; medidor CH2 sobe ao tocar (alvo -20 a -10 dBFS).
+3. Exercício **Pentatônica de Mi menor** → Iniciar → contagem → tocar E2 G2 A2 B2 D3 E3.
+   - Esperado: notas acendem no braço; ao fim aparece `Tentativa 1 · notas X% · timing Y%`; o professor fala (fonte `llm`).
+4. Tocar mais 2 tentativas limpas → banner "Exercício dominado! Próximo: ...".
+5. Parar o Ollama (`taskkill /IM ollama.exe /F`) e tocar uma tentativa → fonte `fallback`, sessão continua.
+6. Música **Brilha Brilha Estrelinha — frase A**: tocar a frase; notas repetidas podem ser abafadas ou não.
+7. Registrar em `validation/session_007/notes.md`: dBFS de CH1/CH2, notas detectadas vs esperadas, fonte do professor, tempo de resposta, problemas.

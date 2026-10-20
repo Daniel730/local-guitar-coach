@@ -1,73 +1,41 @@
-# Local Guitar Coach — codename: Riff
+# Riff — professor de guitarra local
 
-Local, adaptive, data-driven guitar teacher with voice interaction.
-Target: Windows + M-Audio M-Track Duo + Ollama. See `docs/PROJECT_STATE.md` (canonical).
+Tutor de guitarra local e adaptativo: ouve você tocar (M-Track Duo, CH2), compara com o
+exercício, mede notas/timing/BPM/consistência (sem nota final) e um professor no Ollama
+diz em voz alta (pt-BR) o que fazer a seguir. Contrato canônico: `docs/PROJECT_STATE.md`.
 
-## Current state
+## Usar
 
-**MVP-0 — Audio Probe** (the first link in the chain):
+1. Guitarra → Cuvave Cube Baby → **CH2** (Hi-Z/INST) da M-Track, ligada por USB.
+2. Duplo clique em **`start.bat`**. Ele inicia o Ollama, escolhe o modelo, sobe o app e abre o navegador.
+3. Escolha um exercício ou uma música → **Iniciar** → contagem 3-2-1 → toque.
+4. Cada **tentativa** termina quando você toca todas as notas ou fica 2,5 s em silêncio.
+   O professor responde (texto + voz) e o banner sugere o próximo exercício quando você domina o atual
+   (2 de 3 tentativas dentro dos critérios).
+
+Conteúdo: 12 exercícios (cordas soltas, pentatônicas, cromático, escalas maior/menor, colcheias, blues)
+e 5 músicas de domínio público (Brilha Brilha Estrelinha, Ode à Alegria, Frère Jacques, Jingle Bells,
+When the Saints), praticadas frase a frase e depois completas.
+
+## Configuração
+
+| Variável | Padrão | Para quê |
+|---|---|---|
+| `RIFF_OLLAMA_MODEL` | `llama3.1:8b`, senão `gpt-oss:20b`, senão o 1º instalado | modelo do professor |
+| `RIFF_OLLAMA_THINK` | `low` para gpt-oss | modelos com raciocínio respondem em ~8 s |
+| `PORT` | 8000 (ou a próxima livre) | porta do app |
+
+Sem Ollama o app funciona igual: o professor usa o fallback determinístico (REPEAT).
+
+## Desenvolvimento
 
 ```
-M-Track Duo -> Windows -> Python -> Audio captured successfully
+python -m pip install -r requirements.txt
+python -m pytest                       # sem hardware
+python -m perception --self-test       # percepção com sinal sintético
+python -m audio_probe --list           # dispositivos de áudio
 ```
 
-This repo implements **MVP-0 through MVP-5** (see `docs/PROJECT_STATE.md`).
-**MVP-6 (Web App)** is OPEN — gated on the acceptance criteria in `PROJECT_STATE.md` §4.
-Per the contract schema, MVP-6 verifies the full server-side capture →
-perception → teacher → telemetry → browser path before any new feature work.
-
-## Layout
-
-```
-local-guitar-coach/
-├── audio_probe/      # MVP-0: device, config, stream, meters, waveform, probe, cli
-├── tests/            # unit tests (no hardware) + hardware smoke test (gated)
-├── conftest.py
-├── pytest.ini
-└── README.md
-```
-
-## Requirements
-
-- Windows (tested on the M-Track Duo target)
-- Python 3.11 with `sounddevice`, `numpy`, `pytest`
-
-Install deps (already present in this environment):
-```
-pip install sounddevice numpy pytest
-```
-
-## Usage
-
-List input devices:
-```
-python -m audio_probe --list
-```
-
-Probe 3 seconds on the auto-selected device:
-```
-python -m audio_probe --seconds 3
-```
-
-Force a device index (see `--list`):
-```
-python -m audio_probe --device 1 --seconds 3
-```
-
-## Tests
-
-Unit tests (no audio hardware needed):
-```
-pytest
-```
-
-Hardware smoke test (needs the M-Track Duo; play a note during capture):
-```
-pytest tests/test_hardware_smoke.py --hardware -s
-```
-
-## Definition of Done (ARCH §27)
-
-Each feature needs: Implementation + Unit Tests + Integration Test +
-Error Handling + Documentation + Manual Smoke Test. MVP-0 satisfies this
-for the audio-capture link.
+Layout: `perception/` (núcleo congelado: YIN, EventTracker, matcher, avaliação), `ai/teacher/`
+(Ollama → schema → policy), `exercises/` (JSONs + `curriculum.py`), `app/` (FastAPI + WS,
+captura server-side), `frontend/` (HTML/JS puro, só plota telemetria).
