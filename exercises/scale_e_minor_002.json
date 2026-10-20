@@ -1,0 +1,48 @@
+{
+  "id": "scale_e_minor_002",
+  "name": "Pentatônica de Mi menor (descendo)",
+  "description": "A pentatônica de Mi menor em primeira posição, descendo.",
+  "skill": "pentatonic",
+  "subskill": "minor_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 1,
+  "target_notes": [
+    "E3",
+    "D3",
+    "B2",
+    "A2",
+    "G2",
+    "E2"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Pentatônica de Mi menor (descendo) limpo e no tempo.",
+  "prerequisites": [
+    "scale_e_minor_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "acelerar na descida",
+    "deixar cordas soltas soando juntas"
+  ],
+  "hints": [
+    "mantenha os dedos perto das cordas",
+    "abafe a corda anterior ao descer"
+  ],
+  "progression": {
+    "easier": "scale_e_minor_002 a 60 BPM",
+    "harder": "scale_e_minor_002 a 120 BPM"
+  }
+}

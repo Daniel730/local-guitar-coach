@@ -1,0 +1,77 @@
+{
+  "id": "song_frere_jacques_full",
+  "name": "Frère Jacques (Pai Francisco) — completa",
+  "description": "Frère Jacques (Pai Francisco) do início ao fim.",
+  "skill": "songs",
+  "subskill": "melody",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "C3",
+    "D3",
+    "E3",
+    "C3",
+    "C3",
+    "D3",
+    "E3",
+    "C3",
+    "E3",
+    "F3",
+    "G3",
+    "E3",
+    "F3",
+    "G3",
+    "G3",
+    "A3",
+    "G3",
+    "F3",
+    "E3",
+    "C3",
+    "G3",
+    "A3",
+    "G3",
+    "F3",
+    "E3",
+    "C3",
+    "C3",
+    "G2",
+    "C3",
+    "C3",
+    "G2",
+    "C3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Frère Jacques (Pai Francisco) — completa limpo e no tempo.",
+  "prerequisites": [
+    "song_frere_jacques_a",
+    "song_frere_jacques_b"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": false,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "acelerar nas partes conhecidas",
+    "perder a nota inicial da frase"
+  ],
+  "hints": [
+    "toque a frase devagar até sair sem erros",
+    "notas repetidas: abafe levemente entre elas"
+  ],
+  "progression": {
+    "easier": "song_frere_jacques_full a 60 BPM",
+    "harder": "song_frere_jacques_full a 120 BPM"
+  },
+  "rules": {
+    "collapse_repeats": true
+  }
+}

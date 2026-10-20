@@ -1,0 +1,55 @@
+{
+  "id": "blues_e_001",
+  "name": "Escala Blues de Mi",
+  "description": "Pentatônica de Mi menor com a blue note (Lá#), subindo e descendo.",
+  "skill": "pentatonic",
+  "subskill": "minor_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "E2",
+    "G2",
+    "A2",
+    "A#2",
+    "B2",
+    "D3",
+    "E3",
+    "D3",
+    "B2",
+    "A#2",
+    "A2",
+    "G2",
+    "E2"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 90,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala Blues de Mi limpo e no tempo.",
+  "prerequisites": [
+    "pentatonic_e_minor_2oct_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "pular a blue note",
+    "tocar Si e Lá# com o mesmo dedo"
+  ],
+  "hints": [
+    "Lá# na casa 1 da corda Lá, Si na casa 2",
+    "a blue note é passagem: não pare nela"
+  ],
+  "progression": {
+    "easier": "blues_e_001 a 60 BPM",
+    "harder": "blues_e_001 a 110 BPM"
+  }
+}

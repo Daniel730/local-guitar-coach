@@ -1,5 +1,9 @@
 # Validation Session — E Minor Pentatonic (scale_e_minor_001)
 
+## Audio
+- channels (dBFS): 1: -52.5 dBFS | 2: -51.2 dBFS
+- selected: 2: -51.2 dBFS (channel 1)
+
 ## What I intended
 (exercise: scale_e_minor_001; target_bpm=100)
 
@@ -7,18 +11,18 @@
 (FILL MANUALLY: e.g. "played scale clean and slow")
 
 ## What system detected
-- note_accuracy: 0.167
+- note_accuracy: 0.0
 - timing_accuracy: 0.0
 - uncertain_ratio: 0.0
-- performed_bpm: 73.8 (target 100)
-- mean_timing_error_ms: 4924.5
-- counts: {'correct': 1, 'wrong': 4, 'missing': 1, 'extra': 2, 'uncertain': 0}
+- performed_bpm: None (target 100)
+- mean_timing_error_ms: 0.0
+- counts: {'correct': 0, 'wrong': 0, 'missing': 6, 'extra': 0, 'uncertain': 0}
 
 ## What teacher decided
-- action: REPEAT (accepted=True, source=fallback)
-- tempo: 90.0
-- reason: fallback (llm unavailable / timeout)
-- spoken: Vamos repetir no mesmo tempo para estabilizar.
+- action: SLOW_DOWN (accepted=True, source=llm)
+- tempo: 80
+- reason: The student's note accuracy and timing accuracy are both 0, indicating a need to slow down and focus on playing the correct notes.
+- spoken: Let's take it slower. Focus on getting those notes right.
 
 ## What felt wrong
 (FILL MANUALLY: any pedagogical mismatch, crash, nonsense feedback)
@@ -27,3 +31,4 @@
 - device: 1
 - seconds: 14.0
 - fail_ollama: False
+- channel: 1 (explicit)

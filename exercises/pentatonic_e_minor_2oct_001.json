@@ -1,0 +1,54 @@
+{
+  "id": "pentatonic_e_minor_2oct_001",
+  "name": "Pentatônica de Mi menor (2 oitavas)",
+  "description": "A pentatônica de Mi menor em primeira posição, subindo pelas seis cordas.",
+  "skill": "pentatonic",
+  "subskill": "minor_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "E2",
+    "G2",
+    "A2",
+    "B2",
+    "D3",
+    "E3",
+    "G3",
+    "A3",
+    "B3",
+    "D4",
+    "E4",
+    "G4"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Pentatônica de Mi menor (2 oitavas) limpo e no tempo.",
+  "prerequisites": [
+    "scale_e_minor_002"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "errar a posição na corda Si",
+    "perder o tempo na troca para as cordas agudas"
+  ],
+  "hints": [
+    "na corda Si a casa 3 é o Ré",
+    "respire a cada oitava sem parar o pulso"
+  ],
+  "progression": {
+    "easier": "pentatonic_e_minor_2oct_001 a 60 BPM",
+    "harder": "pentatonic_e_minor_2oct_001 a 120 BPM"
+  }
+}

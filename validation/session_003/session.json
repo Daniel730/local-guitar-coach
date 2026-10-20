@@ -1,0 +1,20 @@
+{
+  "session": "session_003",
+  "exercise_id": "scale_e_minor_001",
+  "exercise_name": "E Minor Pentatonic",
+  "device": 1,
+  "seconds": 14.0,
+  "fail_ollama": false,
+  "channels_dbfs": [
+    -55.2,
+    -51.2
+  ],
+  "selected_channel": 1,
+  "started_utc": "2026-08-28T16:47:12.849134+00:00",
+  "ended_utc": "2026-08-28T16:47:26.873868+00:00",
+  "blocks": 653,
+  "max_peak": 0.00274658203125,
+  "max_peak_dbfs": -51.224145347972524,
+  "raw_events": 0,
+  "note_events": 0
+}

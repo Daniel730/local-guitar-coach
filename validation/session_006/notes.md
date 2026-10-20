@@ -1,5 +1,9 @@
 # Validation Session — E Minor Pentatonic (scale_e_minor_001)
 
+## Audio
+- channels (dBFS): 1: -54.1 dBFS | 2: -50.9 dBFS
+- selected: 2: -50.9 dBFS (channel 1)
+
 ## What I intended
 (exercise: scale_e_minor_001; target_bpm=100)
 
@@ -7,12 +11,12 @@
 (FILL MANUALLY: e.g. "played scale clean and slow")
 
 ## What system detected
-- note_accuracy: 0.167
+- note_accuracy: 0.0
 - timing_accuracy: 0.0
-- uncertain_ratio: 0.167
-- performed_bpm: 99.4 (target 100)
-- mean_timing_error_ms: 3794.1
-- counts: {'correct': 1, 'wrong': 4, 'missing': 0, 'extra': 13, 'uncertain': 1}
+- uncertain_ratio: 0.0
+- performed_bpm: None (target 100)
+- mean_timing_error_ms: 0.0
+- counts: {'correct': 0, 'wrong': 0, 'missing': 6, 'extra': 0, 'uncertain': 0}
 
 ## What teacher decided
 - action: REPEAT (accepted=True, source=fallback)
@@ -27,3 +31,4 @@
 - device: 1
 - seconds: 14.0
 - fail_ollama: True
+- channel: 1 (explicit)

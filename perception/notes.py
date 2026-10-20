@@ -41,3 +41,38 @@ def nearest_note_name(freq: float) -> str | None:
     if midi is None:
         return None
     return midi_to_note(midi)
+
+
+def note_to_midi(note_name: str) -> int | None:
+    """Convert a scientific note name (e.g. 'E2', 'F#3') to a MIDI number.
+
+    A4 = 69 = 440 Hz. Equal temperament. Returns None for unparseable names.
+    """
+    import re
+    m = re.fullmatch(r"([A-G])(?:#|b)?(-?\d+)", note_name or "")
+    if not m:
+        return None
+    letter, oct_str = m.group(1), m.group(2)
+    # Octave string may still include an accidental adjacency if the regex
+    # split; re-derive the accidental by checking the full name directly.
+    accidental = ""
+    if len(note_name) > 1 and note_name[1] in ("#", "b"):
+        accidental = note_name[1]
+    name = letter + accidental
+    if name not in _NOTE_NAMES:
+        return None
+    semis = _NOTE_NAMES.index(name)
+    octave = int(oct_str)
+    return (octave + 1) * 12 + semis
+
+
+def note_to_freq(note_name: str) -> float | None:
+    """Convert a scientific note name (e.g. 'E2') to a frequency in Hz.
+
+    Assumes A4 = 440 Hz, equal temperament. Inverse of freq_to_note.
+    Returns None for unparseable names.
+    """
+    midi = note_to_midi(note_name)
+    if midi is None:
+        return None
+    return 440.0 * pow(2.0, (midi - 69) / 12.0)

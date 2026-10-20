@@ -1,0 +1,48 @@
+{
+  "id": "pentatonic_g_major_001",
+  "name": "Pentatônica de Sol maior",
+  "description": "Pentatônica de Sol maior começando na casa 3 da corda Mi grave. Mesmas notas da Mi menor, outro centro.",
+  "skill": "pentatonic",
+  "subskill": "major_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "G2",
+    "A2",
+    "B2",
+    "D3",
+    "E3",
+    "G3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Pentatônica de Sol maior limpo e no tempo.",
+  "prerequisites": [
+    "scale_e_minor_002"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "começar no Mi por hábito",
+    "pular o Lá na corda Lá solta"
+  ],
+  "hints": [
+    "comece com o dedo 3 na casa 3",
+    "ouça o Sol como nota de repouso"
+  ],
+  "progression": {
+    "easier": "pentatonic_g_major_001 a 60 BPM",
+    "harder": "pentatonic_g_major_001 a 120 BPM"
+  }
+}

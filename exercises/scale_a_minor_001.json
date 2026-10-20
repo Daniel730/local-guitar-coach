@@ -1,0 +1,50 @@
+{
+  "id": "scale_a_minor_001",
+  "name": "Escala de Lá menor natural",
+  "description": "Lá menor natural em primeira posição: as notas de Dó maior a partir do Lá.",
+  "skill": "scales",
+  "subskill": "natural_minor",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "A2",
+    "B2",
+    "C3",
+    "D3",
+    "E3",
+    "F3",
+    "G3",
+    "A3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala de Lá menor natural limpo e no tempo.",
+  "prerequisites": [
+    "scale_c_major_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "terminar no Dó por hábito",
+    "pressa nas casas 3"
+  ],
+  "hints": [
+    "comece na corda Lá solta",
+    "mesmos dedos da escala de Dó"
+  ],
+  "progression": {
+    "easier": "scale_a_minor_001 a 60 BPM",
+    "harder": "scale_a_minor_001 a 120 BPM"
+  }
+}

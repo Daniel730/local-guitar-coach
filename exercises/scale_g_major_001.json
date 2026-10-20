@@ -1,0 +1,50 @@
+{
+  "id": "scale_g_major_001",
+  "name": "Escala de Sol maior",
+  "description": "Escala de Sol maior em primeira posição, com o Fá sustenido na corda Ré.",
+  "skill": "scales",
+  "subskill": "major_scale",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "G2",
+    "A2",
+    "B2",
+    "C3",
+    "D3",
+    "E3",
+    "F#3",
+    "G3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala de Sol maior limpo e no tempo.",
+  "prerequisites": [
+    "scale_c_major_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "tocar Fá natural",
+    "trastejar no Fá# com o mínimo"
+  ],
+  "hints": [
+    "Fá# na casa 4 da corda Ré",
+    "dedo 3 na casa 3 da Mi grave para o Sol"
+  ],
+  "progression": {
+    "easier": "scale_g_major_001 a 60 BPM",
+    "harder": "scale_g_major_001 a 120 BPM"
+  }
+}

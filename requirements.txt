@@ -3,3 +3,10 @@
 sounddevice>=0.4.6
 numpy>=1.26
 pytest>=7.0
+
+# MVP-6 Web App
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Teacher (MVP-5) — local LLM only
+ollama>=0.6

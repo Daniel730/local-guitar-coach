@@ -1,0 +1,62 @@
+{
+  "id": "song_frere_jacques_b",
+  "name": "Frère Jacques (Pai Francisco) — frase B",
+  "description": "Frère Jacques (Pai Francisco), frase B. Melodia de domínio público em primeira posição.",
+  "skill": "songs",
+  "subskill": "melody",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "G3",
+    "A3",
+    "G3",
+    "F3",
+    "E3",
+    "C3",
+    "G3",
+    "A3",
+    "G3",
+    "F3",
+    "E3",
+    "C3",
+    "C3",
+    "G2",
+    "C3",
+    "C3",
+    "G2",
+    "C3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Frère Jacques (Pai Francisco) — frase B limpo e no tempo.",
+  "prerequisites": [
+    "song_frere_jacques_a"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": false,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "acelerar nas partes conhecidas",
+    "perder a nota inicial da frase"
+  ],
+  "hints": [
+    "toque a frase devagar até sair sem erros",
+    "notas repetidas: abafe levemente entre elas"
+  ],
+  "progression": {
+    "easier": "song_frere_jacques_b a 60 BPM",
+    "harder": "song_frere_jacques_b a 120 BPM"
+  },
+  "rules": {
+    "collapse_repeats": true
+  }
+}

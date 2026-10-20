@@ -1,0 +1,59 @@
+{
+  "id": "song_ode_to_joy_b",
+  "name": "Ode à Alegria (Beethoven) — frase B",
+  "description": "Ode à Alegria (Beethoven), frase B. Melodia de domínio público em primeira posição.",
+  "skill": "songs",
+  "subskill": "melody",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "E3",
+    "E3",
+    "F3",
+    "G3",
+    "G3",
+    "F3",
+    "E3",
+    "D3",
+    "C3",
+    "C3",
+    "D3",
+    "E3",
+    "D3",
+    "C3",
+    "C3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Ode à Alegria (Beethoven) — frase B limpo e no tempo.",
+  "prerequisites": [
+    "song_ode_to_joy_a"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": false,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "acelerar nas partes conhecidas",
+    "perder a nota inicial da frase"
+  ],
+  "hints": [
+    "toque a frase devagar até sair sem erros",
+    "notas repetidas: abafe levemente entre elas"
+  ],
+  "progression": {
+    "easier": "song_ode_to_joy_b a 60 BPM",
+    "harder": "song_ode_to_joy_b a 120 BPM"
+  },
+  "rules": {
+    "collapse_repeats": true
+  }
+}
