@@ -9,3 +9,6 @@ fastapi>=0.110
 uvicorn[standard]>=0.29
 websockets>=12.0
 pydantic>=2.7
+
+# Teacher (MVP-5) — local LLM only
+ollama>=0.6

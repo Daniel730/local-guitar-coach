@@ -1,6 +1,7 @@
 """SessionService — manages active WebSocket sessions."""
 from __future__ import annotations
 import logging
+import os
 from typing import Dict, Optional, Callable, Any, List
 import uuid
 
@@ -98,7 +99,7 @@ class SessionService:
         # Teacher service
         teacher_svc = TeacherService(
             exercise_id=exercise_id,
-            ollama_model="llama3.1:8b",
+            ollama_model=os.environ.get("RIFF_OLLAMA_MODEL", "llama3.1:8b"),
             fail_ollama=False,
         )
         self._teacher_services[session_id] = teacher_svc

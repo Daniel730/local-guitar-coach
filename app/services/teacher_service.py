@@ -2,6 +2,7 @@
 from __future__ import annotations
 from typing import Optional, Dict, Any, List
 import json
+import os
 import threading
 import time
 
@@ -45,7 +46,8 @@ class TeacherService:
         if fail_ollama:
             self.provider = FakeLLMProvider(mode="unavailable")
         else:
-            self.provider = OllamaProvider(model=ollama_model)
+            self.provider = OllamaProvider(model=ollama_model,
+                                           think=os.environ.get("RIFF_OLLAMA_THINK") or None)
 
         # Policy — tempo bounds come from the exercise definition.
         # The whole curriculum is offered, so a teacher START_EXERCISE
@@ -68,7 +70,10 @@ class TeacherService:
             time_remaining_s=600.0,
         )
 
-        self.teacher = Teacher(provider=self.provider, policy=self.policy)
+        # Fallback = REPEAT this exercise at its start tempo (never an out-of-range BPM).
+        self.teacher = Teacher(provider=self.provider, policy=self.policy,
+                               fallback_exercise_id=exercise_id,
+                               fallback_stable_bpm=float(self.exercise.start_bpm or self.exercise.target_bpm))
 
         self._note_events: list[NoteEvent] = []
         self._comparison = None
@@ -176,6 +181,8 @@ class TeacherService:
         # Teacher decision
         decision = self.teacher.decide(ctx)
         self._last_decision = decision
+        if decision.source != "fallback" and decision.tempo and decision.exercise_id == self.exercise_id:
+            self.teacher.fallback_stable_bpm = float(decision.tempo)  # last tempo the policy accepted
         return decision
 
     def get_teacher_telemetry(self) -> dict:

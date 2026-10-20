@@ -66,9 +66,13 @@ class OllamaProvider(LLMProvider):
     # Ollama can be slow on cold start (model load). 60s avoids false fallback.
     DEFAULT_TIMEOUT_S = 60.0
 
-    def __init__(self, model: str = "llama3.1:8b", host: Optional[str] = None) -> None:
+    def __init__(self, model: str = "llama3.1:8b", host: Optional[str] = None,
+                 think: Optional[str] = None) -> None:
         self.model = model
         self.host = host or self.DEFAULT_HOST
+        # Reasoning models (e.g. gpt-oss) need think="low" to answer within the timeout;
+        # None = don't send the flag (non-thinking models reject it).
+        self.think = think
         self._client = None
 
     def _ensure_client(self):
@@ -90,6 +94,7 @@ class OllamaProvider(LLMProvider):
                     {"role": "user", "content": user_prompt},
                 ],
                 options={"temperature": 0.2},
+                **({"think": self.think} if self.think else {}),
             )
             return resp["message"]["content"]
         except Exception as e:  # noqa: BLE001 — any failure -> let Teacher fall back
