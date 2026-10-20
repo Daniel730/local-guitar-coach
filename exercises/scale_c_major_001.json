@@ -1,0 +1,50 @@
+{
+  "id": "scale_c_major_001",
+  "name": "Escala de Dó maior",
+  "description": "Escala de Dó maior em primeira posição. Base das músicas em Dó.",
+  "skill": "scales",
+  "subskill": "major_scale",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "C3",
+    "D3",
+    "E3",
+    "F3",
+    "G3",
+    "A3",
+    "B3",
+    "C4"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala de Dó maior limpo e no tempo.",
+  "prerequisites": [
+    "chromatic_1234_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "tocar Fá# no lugar de Fá",
+    "confundir Si solto com Dó"
+  ],
+  "hints": [
+    "Fá na casa 3 da corda Ré",
+    "Si é a corda solta, Dó a casa 1 da corda Si"
+  ],
+  "progression": {
+    "easier": "scale_c_major_001 a 60 BPM",
+    "harder": "scale_c_major_001 a 120 BPM"
+  }
+}

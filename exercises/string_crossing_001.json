@@ -1,0 +1,48 @@
+{
+  "id": "string_crossing_001",
+  "name": "Troca de Cordas",
+  "description": "Corda solta seguida de nota presa na corda de cima. Precisão da palheta ao atravessar cordas.",
+  "skill": "alternate_picking",
+  "subskill": "string_crossing",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "A2",
+    "E3",
+    "D3",
+    "A3",
+    "G3",
+    "D4"
+  ],
+  "start_bpm": 50,
+  "target_bpm": 90,
+  "subdivision": "quarter",
+  "objective": "Tocar Troca de Cordas limpo e no tempo.",
+  "prerequisites": [
+    "open_strings_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "errar a corda ao subir",
+    "deixar a corda solta soando sob a nota presa"
+  ],
+  "hints": [
+    "movimento mínimo da palheta entre cordas",
+    "dedo 2 na casa 2, dedo 3 na casa 3"
+  ],
+  "progression": {
+    "easier": "string_crossing_001 a 50 BPM",
+    "harder": "string_crossing_001 a 110 BPM"
+  }
+}

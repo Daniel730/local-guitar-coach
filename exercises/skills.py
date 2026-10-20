@@ -66,6 +66,18 @@ KNOWN_SKILLS: dict[str, Skill] = {
         description="Hammer-ons, pull-offs, slides, bends, vibrato, legato.",
         subskills=["hammer_on", "pull_off", "bends", "vibrato", "legato"],
     ),
+    "scales": Skill(
+        id="scales",
+        name="Escalas",
+        description="Escalas maiores e menores em primeira posição.",
+        subskills=["major_scale", "natural_minor"],
+    ),
+    "songs": Skill(
+        id="songs",
+        name="Músicas",
+        description="Melodias de domínio público, frase a frase.",
+        subskills=["melody"],
+    ),
 }
 
 # Known subskills (content contract).
@@ -85,6 +97,9 @@ KNOWN_SUBSKILLS: dict[str, Subskill] = {
     "bends": Subskill("bends", "technique", "Bends", "String bends."),
     "vibrato": Subskill("vibrato", "technique", "Vibrato", "Vibrato technique."),
     "legato": Subskill("legato", "technique", "Legato", "Legato phrasing."),
+    "major_scale": Subskill("major_scale", "scales", "Escala Maior", "Escala maior em primeira posição."),
+    "natural_minor": Subskill("natural_minor", "scales", "Menor Natural", "Escala menor natural em primeira posição."),
+    "melody": Subskill("melody", "songs", "Melodia", "Melodia de uma música, frase a frase."),
 }
 
 

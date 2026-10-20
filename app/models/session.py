@@ -111,6 +111,9 @@ class ExerciseInfo(BaseModel):
     target_notes: List[str]
     difficulty: int
     target_bpm: Optional[float] = None
+    start_bpm: Optional[float] = None
+    skill: Optional[str] = None
+    description: Optional[str] = None
 
 
 class DeviceInfo(BaseModel):

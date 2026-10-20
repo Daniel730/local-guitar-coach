@@ -125,6 +125,9 @@ class TeacherService:
         # Tempo from the exercise definition (CHANGE-05).
         target_bpm = self.exercise.target_bpm
         subdivision = self.exercise.subdivision
+        if self.exercise.rules.get("collapse_repeats"):
+            # Match expected_sequence: a muted re-strike still arrives as 2 events.
+            notes = [n for i, n in enumerate(notes) if i == 0 or n.note != notes[i - 1].note]
 
         # Compare
         self._comparison = compare(

@@ -59,8 +59,15 @@ class Exercise:
 
     @property
     def expected_sequence(self) -> List[str]:
-        """The note sequence the student should play (MVP-3 target)."""
-        return list(self.target_notes)
+        """The note sequence the student should play (MVP-3 target).
+
+        rules.collapse_repeats (songs): the EventTracker merges a re-struck
+        identical note without silence, so repeated notes are compared as one.
+        """
+        notes = list(self.target_notes)
+        if self.rules.get("collapse_repeats"):
+            notes = [n for i, n in enumerate(notes) if i == 0 or n != notes[i - 1]]
+        return notes
 
     def to_dict(self) -> dict:
         d = {

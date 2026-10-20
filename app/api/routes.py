@@ -24,25 +24,21 @@ async def health() -> HealthResponse:
 
 @router.get("/exercises", response_model=List[ExerciseInfo])
 async def list_exercises() -> List[ExerciseInfo]:
-    exercises = []
-    import os
-    exercises_dir = "exercises"
-    if os.path.exists(exercises_dir):
-        for fname in os.listdir(exercises_dir):
-            if fname.endswith(".json"):
-                ex_id = fname[:-5]
-                try:
-                    ex = load_exercise(os.path.join(exercises_dir, fname))
-                    exercises.append(ExerciseInfo(
-                        id=ex.id,
-                        name=ex.name,
-                        target_notes=ex.expected_sequence,
-                        difficulty=ex.difficulty,
-                        target_bpm=ex.target_bpm,
-                    ))
-                except Exception:
-                    continue
-    return exercises
+    """All exercises in curriculum order (difficulty, id)."""
+    from exercises.curriculum import list_exercises as curriculum_exercises
+    return [
+        ExerciseInfo(
+            id=ex.id,
+            name=ex.name,
+            target_notes=ex.expected_sequence,
+            difficulty=ex.difficulty,
+            target_bpm=ex.target_bpm,
+            start_bpm=ex.start_bpm,
+            skill=ex.skill,
+            description=ex.description,
+        )
+        for ex in curriculum_exercises()
+    ]
 
 
 @router.get("/exercises/{exercise_id}", response_model=ExerciseInfo)

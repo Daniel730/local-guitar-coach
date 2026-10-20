@@ -150,29 +150,45 @@
             exerciseSelect.innerHTML = '<option value="">Escolha um exercício</option>';
             if (exerciseListEl) exerciseListEl.innerHTML = '';
             exerciseMeta = {};
-            ex.forEach(e => {
-                // /api/exercises currently exposes target_bpm only; start_bpm used if present
-                exerciseMeta[e.id] = { name: e.name, start_bpm: e.start_bpm ?? null, target_bpm: e.target_bpm ?? null };
-                const opt = document.createElement('option');
-                opt.value = e.id;
-                opt.textContent = e.name;
-                exerciseSelect.appendChild(opt);
-                // exercises view card
+            // Songs get their own group in the select and the exercises view.
+            const groups = [['Exercícios', ex.filter(e => e.skill !== 'songs')],
+                            ['Músicas', ex.filter(e => e.skill === 'songs')]];
+            groups.forEach(([label, items]) => {
+                if (!items.length) return;
+                const og = document.createElement('optgroup');
+                og.label = label;
+                exerciseSelect.appendChild(og);
                 if (exerciseListEl) {
-                    const item = document.createElement('div');
-                    item.className = 'exercise-item';
-                    const notes = (e.target_notes || []).join(' ');
-                    item.innerHTML = `<div><div class="ex-name">${e.name}</div>
-                        <div class="ex-meta">${notes}</div></div>
-                        <div class="ex-meta">${e.target_bpm ?? '—'} BPM · dificuldade ${e.difficulty ?? 1}</div>`;
-                    item.style.cursor = 'pointer';
-                    item.addEventListener('click', () => {
-                        exerciseSelect.value = e.id;
-                        selectExercise();
-                        showView('coach');
-                    });
-                    exerciseListEl.appendChild(item);
+                    const h = document.createElement('h3');
+                    h.className = 'exercise-group';
+                    h.textContent = label;
+                    exerciseListEl.appendChild(h);
                 }
+                items.forEach(e => {
+                    exerciseMeta[e.id] = { name: e.name, start_bpm: e.start_bpm ?? null, target_bpm: e.target_bpm ?? null };
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.textContent = e.name;
+                    og.appendChild(opt);
+                    if (exerciseListEl) {
+                        const item = document.createElement('div');
+                        item.className = 'exercise-item';
+                        const notes = (e.target_notes || []).join(' ');
+                        item.innerHTML = `<div><div class="ex-name"></div>
+                            <div class="ex-meta ex-desc"></div>
+                            <div class="ex-meta">${notes}</div></div>
+                            <div class="ex-meta">${e.target_bpm ?? '—'} BPM · dificuldade ${e.difficulty ?? 1}</div>`;
+                        item.querySelector('.ex-name').textContent = e.name;
+                        item.querySelector('.ex-desc').textContent = e.description || '';
+                        item.style.cursor = 'pointer';
+                        item.addEventListener('click', () => {
+                            exerciseSelect.value = e.id;
+                            selectExercise();
+                            showView('coach');
+                        });
+                        exerciseListEl.appendChild(item);
+                    }
+                });
             });
             if (!ex.length && exerciseListEl) {
                 exerciseListEl.innerHTML = '<p class="muted">Nenhum exercício encontrado.</p>';
