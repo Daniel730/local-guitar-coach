@@ -409,7 +409,7 @@
                 const p = data.performance || {};
                 const pct = v => v != null ? Math.round(v * 100) + '%' : '--';
                 neckHintEl.textContent = `Tentativa ${data.attempt} · notas ${pct(p.note_accuracy)}`
-                    + ` · ritmo ${pct(p.timing_accuracy)}`
+                    + (p.timing_accuracy != null ? ` · ritmo ${pct(p.timing_accuracy)}` : '')
                     + (p.performed_bpm != null ? ` · ${Math.round(p.performed_bpm)} BPM` : '');
                 log(`attempt     #${data.attempt} notes=${pct(p.note_accuracy)} timing=${pct(p.timing_accuracy)}`);
                 bumpEvent();

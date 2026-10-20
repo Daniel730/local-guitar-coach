@@ -319,7 +319,7 @@ ao LiteLLM permitida (o runtime continua só-Ollama).
 | Gate 1-2: fonte sintética → percepção → WS (pitch/meter/note_event) | `tests/test_e2e_synthetic.py` | PASS (pytest) |
 | Gate 3: TeacherAction `source=llm` com Ollama real | gpt-oss:20b, think=low, 8,2 s, feedback pt-BR citando 83,3%/33,3% | PASS (manual) |
 | Gate 4: Ollama indisponível → fallback, sessão viva | `test_e2e_synthetic.py`, `test_attempts.py` | PASS |
-| Gate 6: suíte | `pytest` | **174 passed, 1 skipped** |
+| Gate 6: suíte | `pytest` | **183 passed, 1 skipped** |
 | Uma decisão do professor por tentativa (não mais a cada 3 s) | `app/services/teacher_service.py`, `websocket.py` | `tests/test_attempts.py` |
 | Nota final de tentativa fechava só na próxima nota | `AudioService._track_silence` (app, não perception) | e2e |
 | `ollama` faltava no `.venv`/requirements → web app sempre em fallback | `requirements.txt` | corrigido |

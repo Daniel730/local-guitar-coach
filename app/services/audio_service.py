@@ -168,10 +168,6 @@ class AudioService:
                 self.on_note_event(ne)
         self._running = False
 
-    @property
-    def is_running(self) -> bool:
-        return self._running
-
     def measure_channels(self, seconds: float = 1.0) -> List[float]:
         """Measure per-channel peak dBFS before capture (like coach.py)."""
         cfg = _PortAudioConfig(device=self.config.device, sample_rate=self.config.sample_rate,
@@ -199,9 +195,3 @@ class AudioService:
         result = [round(20 * np.log10(float(p) + 1e-9), 1) for p in peaks]
         logger.info("[audio] measure_channels: CH1=%.1f CH2=%.1f dBFS", result[0], result[1] if len(result) > 1 else float("nan"))
         return result
-
-    def get_note_events(self) -> List[NoteEvent]:
-        return list(self._tracker.events)
-
-    def reset_tracker(self) -> None:
-        self._tracker.reset()

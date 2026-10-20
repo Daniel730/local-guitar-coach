@@ -111,9 +111,6 @@ class SessionService:
     def get_session(self, session_id: str) -> Optional[Session]:
         return self._sessions.get(session_id)
 
-    def get_audio_service(self, session_id: str) -> Optional[AudioService]:
-        return self._audio_services.get(session_id)
-
     def get_teacher_service(self, session_id: str) -> Optional[TeacherService]:
         return self._teacher_services.get(session_id)
 
@@ -176,6 +173,8 @@ class SessionService:
         attempt = getattr(teacher_svc, "attempt_count", 0)
         record_id = f"{session_id}_a{attempt}" if attempt else session_id
         persistence.save_performance(perf, session_id=record_id)
+        from exercises.curriculum import record_attempt
+        record_attempt(perf.to_dict())
         # Update + persist the skill state (P1-B part 2)
         skill = getattr(teacher_svc.exercise, "skill", None) or "unknown"
         try:

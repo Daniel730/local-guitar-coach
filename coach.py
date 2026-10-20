@@ -48,6 +48,7 @@ from perception.performance import PerformanceEvaluator
 from ai.teacher import Teacher, TeacherContext, FakeLLMProvider, PolicyValidator
 from ai.teacher.build_context import build_context
 from ai.teacher.provider import OllamaProvider
+from app.services.teacher_service import TeacherService
 
 
 def _ollama_provider(model: str, fail: bool):
@@ -182,7 +183,7 @@ def run_session(args) -> int:
     # --- MVP-4: evaluate ---
     perf = PerformanceEvaluator().evaluate(
         comp, target_bpm=tempo["target_bpm"], subdivision=tempo["subdivision"],
-        performed_bpm=_estimate_bpm(note_events, tempo["subdivision"], tempo["target_bpm"]),
+        performed_bpm=TeacherService._estimate_bpm(note_events, tempo["subdivision"], tempo["target_bpm"]),
     )
     # --- MVP-5: teacher decision ---
     ctx = build_context(
@@ -243,23 +244,6 @@ def run_session(args) -> int:
     print(json.dumps(decision_dict, indent=2, ensure_ascii=False))
     print(f"\n[coach] artifacts written to {out.resolve()}")
     return 0
-
-
-def _estimate_bpm(note_events: list, subdivision: str, target_bpm: float) -> float | None:
-    """Crude performed BPM from inter-onset distance. None if <2 notes."""
-    starts = sorted(e.start for e in note_events if hasattr(e, "start") and e.start is not None)
-    if len(starts) < 2:
-        return None
-    diffs = np.diff(starts)
-    diffs = diffs[diffs > 0.05]  # ignore overlaps
-    if len(diffs) == 0:
-        return None
-    median_gap = float(np.median(diffs))
-    factor = {"quarter": 1.0, "eighth": 0.5, "half": 2.0, "sixteenth": 0.25}.get(subdivision, 1.0)
-    beat = median_gap / factor if factor else median_gap
-    if beat <= 0:
-        return None
-    return round(60.0 / beat, 1)
 
 
 def _notes_template(ex, perf, decision: dict, args, channels_dbfs, chosen) -> str:

@@ -30,14 +30,11 @@ def list_exercises(dir: str = "exercises") -> List[Exercise]:
     return sorted(out, key=lambda e: (e.difficulty, e.id))
 
 
-def load_attempts(session_dir=None) -> List[dict]:
-    """Per-attempt performance dicts from the persistence dir, ordered by file mtime."""
-    if session_dir is None:
-        from perception import persistence
-        session_dir = persistence._session_dir()
-    d = Path(session_dir)
-    if not d.is_dir():
-        return []
+ATTEMPTS_LOG = "attempts.jsonl"
+
+
+def _scan_attempt_files(d: Path) -> List[dict]:
+    """Per-attempt performance JSON files, ordered by mtime (pre-log history)."""
     attempts = []
     for path in sorted(d.glob("*.json"), key=lambda p: (p.stat().st_mtime, p.name)):
         if path.name.startswith("skill_"):
@@ -46,6 +43,38 @@ def load_attempts(session_dir=None) -> List[dict]:
             data = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             continue
+        if isinstance(data, dict) and data.get("exercise_id"):
+            attempts.append(data)
+    return attempts
+
+
+def _attempts_log(session_dir=None) -> Path:
+    """One line per attempt, so reading history is one file, not thousands."""
+    if session_dir is None:
+        from perception import persistence
+        session_dir = persistence._session_dir()
+    d = Path(session_dir)
+    log = d / ATTEMPTS_LOG
+    if not log.exists():  # one-time import of the per-file history
+        d.mkdir(parents=True, exist_ok=True)
+        log.write_text("".join(json.dumps(a, ensure_ascii=False) + "\n"
+                               for a in _scan_attempt_files(d)), encoding="utf-8")
+    return log
+
+
+def record_attempt(attempt: dict, session_dir=None) -> None:
+    with _attempts_log(session_dir).open("a", encoding="utf-8") as f:
+        f.write(json.dumps(attempt, ensure_ascii=False) + "\n")
+
+
+def load_attempts(session_dir=None) -> List[dict]:
+    """Per-attempt performance dicts, oldest first."""
+    attempts = []
+    for line in _attempts_log(session_dir).read_text(encoding="utf-8").splitlines():
+        try:
+            data = json.loads(line)
+        except ValueError:
+            continue  # a line cut short by a crash mid-write
         if isinstance(data, dict) and data.get("exercise_id"):
             attempts.append(data)
     return attempts

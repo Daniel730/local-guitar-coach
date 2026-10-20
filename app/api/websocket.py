@@ -30,24 +30,22 @@ class WebSocketHandler:
 
         try:
             while True:
-                try:
-                    msg = await websocket.receive()
-                except RuntimeError as e:
-                    if "Cannot call \"receive\" once a disconnect" in str(e):
-                        break
-                    raise
-                if "text" in msg:
+                msg = await websocket.receive()
+                if msg["type"] == "websocket.disconnect":
+                    logger.info("WebSocket disconnected")
+                    break
+                if msg.get("text"):
                     session_id = await self._handle_text(websocket, msg["text"], session_id)
                 # NOTE: browser no longer uploads binary audio — capture is done
                 # server-side via sounddevice. Ignore any binary frames.
         except WebSocketDisconnect:
             logger.info("WebSocket disconnected")
-            if session_id:
-                self._cleanup(session_id)
         except Exception as e:
             logger.exception("WebSocket error")
+            await self._send_error(websocket, str(e))
+        finally:
+            # Closing or reloading the tab must release the device and the session.
             if session_id:
-                await self._send_error(websocket, str(e))
                 self._cleanup(session_id)
 
     async def _handle_text(self, websocket: WebSocket, text: str, current_session_id) -> Optional[str]:

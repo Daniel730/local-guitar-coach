@@ -180,6 +180,7 @@ class TeacherService:
             available_exercises=[self.exercise_id],
             voice_mode="COACH",
         )
+        ctx.latest_performance = self._report(ctx.latest_performance)
         ctx.rendered = json.dumps(ctx.to_dict(), ensure_ascii=False)
 
         # Teacher decision
@@ -206,7 +207,15 @@ class TeacherService:
     def get_performance_telemetry(self) -> dict:
         if self._performance is None:
             return {}
-        return self._performance.to_dict()
+        return self._report(self._performance.to_dict())
+
+    def _report(self, perf: Optional[dict]) -> Optional[dict]:
+        """Hide timing the exercise does not grade (songs: notes of unequal length
+        would read as bad timing). The stored result keeps the raw values."""
+        if perf is None or self.exercise.evaluation.get("timing_accuracy") is not False:
+            return perf
+        return {**perf, "timing_accuracy": None, "mean_timing_error_ms": None,
+                "timing_errors_ms": [], "note_timing": []}
 
     @staticmethod
     def _estimate_bpm(note_events, subdivision: str, target_bpm: float) -> float | None:

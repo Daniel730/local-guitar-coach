@@ -9,7 +9,7 @@ import pytest
 from fastapi import HTTPException
 
 from exercises.curriculum import (
-    is_mastered, list_exercises, load_attempts, next_exercise,
+    is_mastered, list_exercises, load_attempts, next_exercise, record_attempt,
 )
 from exercises.exercise import exercise_from_dict
 
@@ -107,7 +107,9 @@ def test_list_and_load_attempts(tmp_path):
     (sess / "skill_pentatonic.json").write_text(json.dumps({"skill": "p"}), encoding="utf-8")
     (sess / "other.json").write_text(json.dumps({"foo": 1}), encoding="utf-8")
     att = load_attempts(sess)
-    assert [a["note_accuracy"] for a in att] == [0, 1]  # mtime order
+    assert [a["note_accuracy"] for a in att] == [0, 1]  # legacy files imported in mtime order
+    record_attempt(_att("a_one", note=2), sess)
+    assert [a["note_accuracy"] for a in load_attempts(sess)] == [0, 1, 2]
 
 
 @pytest.fixture
@@ -125,7 +127,7 @@ def test_api_next_direct(api_env):
     assert set(r) == {"current", "mastered", "next_exercise_id", "reason"}
     assert r["next_exercise_id"] == "a_one" and r["mastered"] is False
     for i in range(2):
-        (api_env / f"a{i}.json").write_text(json.dumps(_att("a_one", **GOOD)), encoding="utf-8")
+        record_attempt(_att("a_one", **GOOD), api_env)
     r = asyncio.run(next_step(current="a_one"))
     assert r["mastered"] is True and r["next_exercise_id"] == "b_two"
     with pytest.raises(HTTPException) as exc:
