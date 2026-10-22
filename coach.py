@@ -293,7 +293,7 @@ def main() -> int:
     p.add_argument("--exercise", type=str, default="exercises/scale_e_minor_001.json")
     p.add_argument("--session", type=str, default="validation/session_001")
     p.add_argument("--student", type=str, default="beginner")
-    p.add_argument("--ollama-model", type=str, default="llama3.1:8b")
+    p.add_argument("--ollama-model", type=str, default="qwen2.5:7b")
     p.add_argument("--fail-ollama", action="store_true", help="simulate Ollama down (Test 6)")
     p.add_argument("--channel", type=int, default=0, help="audio channel to use (0 or 1); ignored if --auto-channel")
     p.add_argument("--auto-channel", action="store_true", help="auto-select loudest channel (reported, not silent)")

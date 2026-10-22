@@ -21,7 +21,7 @@ When the Saints), praticadas frase a frase e depois completas.
 
 | Variável | Padrão | Para quê |
 |---|---|---|
-| `RIFF_OLLAMA_MODEL` | `llama3.1:8b`, senão `gpt-oss:20b`, senão o 1º instalado | modelo do professor |
+| `RIFF_OLLAMA_MODEL` | `qwen2.5:7b` (~1,5 s por tentativa), senão `llama3.1:8b`, senão `gpt-oss:20b`, senão o 1º instalado | modelo do professor |
 | `RIFF_OLLAMA_THINK` | `low` para gpt-oss | modelos com raciocínio respondem em ~8 s |
 | `PORT` | 8000 (ou a próxima livre) | porta do app |
 

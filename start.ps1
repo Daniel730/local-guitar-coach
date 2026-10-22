@@ -36,10 +36,10 @@ if (-not (Test-Ollama)) {
 $models = @()
 if (Test-Ollama) { $models = @((Invoke-RestMethod -Uri "http://127.0.0.1:11434/api/tags").models.name) }
 if (-not $env:RIFF_OLLAMA_MODEL) {
-    $pick = @("llama3.1:8b", "gpt-oss:20b") | Where-Object { $models -contains $_ } | Select-Object -First 1
+    $pick = @("qwen2.5:7b", "llama3.1:8b", "gpt-oss:20b") | Where-Object { $models -contains $_ } | Select-Object -First 1
     if (-not $pick) { $pick = $models | Select-Object -First 1 }
     if ($pick) { $env:RIFF_OLLAMA_MODEL = $pick }
-    elseif (Test-Ollama) { Write-Warning "Ollama sem modelos: o professor vai usar o fallback. Rode: ollama pull llama3.1:8b" }
+    elseif (Test-Ollama) { Write-Warning "Ollama sem modelos: o professor vai usar o fallback. Rode: ollama pull qwen2.5:7b" }
 } elseif ((Test-Ollama) -and $models -notcontains $env:RIFF_OLLAMA_MODEL) {
     Write-Warning "Modelo '$($env:RIFF_OLLAMA_MODEL)' nao esta no Ollama: o professor vai usar o fallback. Rode: ollama pull $($env:RIFF_OLLAMA_MODEL)"
 }

@@ -25,6 +25,9 @@ def validate_action(raw_text: str, schema: dict = None) -> Tuple[bool, object, s
     """
     if schema is None:
         schema = load_schema()
+    # Small models wrap the object in a ```json fence: unwrap it, nothing else is relaxed.
+    if isinstance(raw_text, str) and raw_text.strip().startswith("```"):
+        raw_text = raw_text.strip().split("\n", 1)[-1].rsplit("```", 1)[0]
     # Must be parseable JSON.
     try:
         data = json.loads(raw_text)
