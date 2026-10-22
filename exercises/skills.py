@@ -72,6 +72,12 @@ KNOWN_SKILLS: dict[str, Skill] = {
         description="Escalas maiores e menores em primeira posição.",
         subskills=["major_scale", "natural_minor"],
     ),
+    "punk": Skill(
+        id="punk",
+        name="Punk",
+        description="Tônicas, power chords partidos e progressões punk em palhetada para baixo.",
+        subskills=["root_riffs", "broken_power_chords"],
+    ),
     "songs": Skill(
         id="songs",
         name="Músicas",
@@ -99,6 +105,8 @@ KNOWN_SUBSKILLS: dict[str, Subskill] = {
     "legato": Subskill("legato", "technique", "Legato", "Legato phrasing."),
     "major_scale": Subskill("major_scale", "scales", "Escala Maior", "Escala maior em primeira posição."),
     "natural_minor": Subskill("natural_minor", "scales", "Menor Natural", "Escala menor natural em primeira posição."),
+    "root_riffs": Subskill("root_riffs", "punk", "Riffs de Tônica", "Progressões tocadas só na tônica, corda Mi e Lá."),
+    "broken_power_chords": Subskill("broken_power_chords", "punk", "Power Chord Partido", "Tônica e quinta tocadas uma de cada vez."),
     "melody": Subskill("melody", "songs", "Melodia", "Melodia de uma música, frase a frase."),
 }
 

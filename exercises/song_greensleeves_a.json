@@ -1,0 +1,63 @@
+{
+  "id": "song_greensleeves_a",
+  "name": "Greensleeves — frase A",
+  "description": "Greensleeves, frase A. Melodia de domínio público em primeira posição.",
+  "skill": "songs",
+  "subskill": "melody",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "A3",
+    "C4",
+    "D4",
+    "E4",
+    "F4",
+    "E4",
+    "D4",
+    "B3",
+    "G3",
+    "A3",
+    "B3",
+    "C4",
+    "A3",
+    "A3",
+    "G#3",
+    "A3",
+    "B3",
+    "G#3",
+    "E3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Greensleeves — frase A limpo e no tempo.",
+  "prerequisites": [
+    "scale_a_minor_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": false,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "acelerar nas partes conhecidas",
+    "perder a nota inicial da frase"
+  ],
+  "hints": [
+    "toque a frase devagar até sair sem erros",
+    "notas repetidas: abafe levemente entre elas"
+  ],
+  "progression": {
+    "easier": "song_greensleeves_a a 60 BPM",
+    "harder": "song_greensleeves_a a 120 BPM"
+  },
+  "rules": {
+    "collapse_repeats": true
+  }
+}

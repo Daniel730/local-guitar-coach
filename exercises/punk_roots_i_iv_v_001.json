@@ -1,0 +1,50 @@
+{
+  "id": "punk_roots_i_iv_v_001",
+  "name": "Punk: I–IV–V em Mi",
+  "description": "A progressão de três acordes do punk, só nas tônicas: Mi e Lá soltas, Si na casa 2 da corda Lá.",
+  "skill": "punk",
+  "subskill": "root_riffs",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "E2",
+    "A2",
+    "B2",
+    "A2",
+    "E2",
+    "A2",
+    "B2",
+    "E2"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 130,
+  "subdivision": "quarter",
+  "objective": "Tocar Punk: I–IV–V em Mi limpo e no tempo.",
+  "prerequisites": [
+    "punk_roots_e_a_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "arrastar o dedo em vez de saltar de casa",
+    "acelerar na volta ao Mi"
+  ],
+  "hints": [
+    "palhetada só para baixo, como nos Ramones",
+    "abafe as cordas com a palma da mão direita"
+  ],
+  "progression": {
+    "easier": "punk_roots_i_iv_v_001 a 60 BPM",
+    "harder": "punk_roots_i_iv_v_001 a 150 BPM"
+  }
+}

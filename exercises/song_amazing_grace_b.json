@@ -1,0 +1,63 @@
+{
+  "id": "song_amazing_grace_b",
+  "name": "Amazing Grace — frase B",
+  "description": "Amazing Grace, frase B. Melodia de domínio público em primeira posição.",
+  "skill": "songs",
+  "subskill": "melody",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "B3",
+    "D4",
+    "B3",
+    "D4",
+    "B3",
+    "G3",
+    "D3",
+    "E3",
+    "G3",
+    "G3",
+    "E3",
+    "D3",
+    "D3",
+    "G3",
+    "B3",
+    "G3",
+    "B3",
+    "A3",
+    "G3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Amazing Grace — frase B limpo e no tempo.",
+  "prerequisites": [
+    "song_amazing_grace_a"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": false,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "acelerar nas partes conhecidas",
+    "perder a nota inicial da frase"
+  ],
+  "hints": [
+    "toque a frase devagar até sair sem erros",
+    "notas repetidas: abafe levemente entre elas"
+  ],
+  "progression": {
+    "easier": "song_amazing_grace_b a 60 BPM",
+    "harder": "song_amazing_grace_b a 120 BPM"
+  },
+  "rules": {
+    "collapse_repeats": true
+  }
+}

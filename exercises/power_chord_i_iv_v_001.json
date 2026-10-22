@@ -1,0 +1,50 @@
+{
+  "id": "power_chord_i_iv_v_001",
+  "name": "Power chords I–IV–V (experimental)",
+  "description": "E5 e A5 com tônica solta, B5 nas casas 2 e 4 das cordas Lá e Ré. EXPERIMENTAL: o detector ouve uma nota de cada vez, por isso avalia a tônica (nota mais grave) do acorde; o resultado pode falhar até ser validado com guitarra.",
+  "skill": "chords",
+  "subskill": "power_chords",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "E2",
+    "A2",
+    "B2",
+    "A2",
+    "E2",
+    "A2",
+    "B2",
+    "E2"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 130,
+  "subdivision": "quarter",
+  "objective": "Tocar Power chords I–IV–V (experimental) limpo e no tempo.",
+  "prerequisites": [
+    "power_chord_e5_a5_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "mudar a forma da mão entre acordes",
+    "atrasar a chegada ao B5"
+  ],
+  "hints": [
+    "prepare os dedos do B5 enquanto toca o A5",
+    "comece a 60 BPM só com palhetadas para baixo"
+  ],
+  "progression": {
+    "easier": "power_chord_i_iv_v_001 a 60 BPM",
+    "harder": "power_chord_i_iv_v_001 a 150 BPM"
+  }
+}

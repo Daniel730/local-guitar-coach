@@ -1,0 +1,60 @@
+{
+  "id": "scale_c_major_groups3_001",
+  "name": "Dó maior em grupos de 3",
+  "description": "Dó maior em sequência de três notas: Dó-Ré-Mi, Ré-Mi-Fá...",
+  "skill": "scales",
+  "subskill": "major_scale",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "C3",
+    "D3",
+    "E3",
+    "D3",
+    "E3",
+    "F3",
+    "E3",
+    "F3",
+    "G3",
+    "F3",
+    "G3",
+    "A3",
+    "G3",
+    "A3",
+    "B3",
+    "A3",
+    "B3",
+    "C4"
+  ],
+  "start_bpm": 50,
+  "target_bpm": 90,
+  "subdivision": "quarter",
+  "objective": "Tocar Dó maior em grupos de 3 limpo e no tempo.",
+  "prerequisites": [
+    "scale_c_major_thirds_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "perder a conta do grupo",
+    "acentuar a nota errada"
+  ],
+  "hints": [
+    "acentue a primeira de cada grupo",
+    "conte 1-2-3 em voz alta"
+  ],
+  "progression": {
+    "easier": "scale_c_major_groups3_001 a 50 BPM",
+    "harder": "scale_c_major_groups3_001 a 110 BPM"
+  }
+}

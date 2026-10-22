@@ -1,0 +1,50 @@
+{
+  "id": "blues_a_001",
+  "name": "Escala blues de Lá",
+  "description": "Pentatônica de Lá menor com a blue note (Ré#) em primeira posição.",
+  "skill": "pentatonic",
+  "subskill": "minor_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "A2",
+    "C3",
+    "D3",
+    "D#3",
+    "E3",
+    "G3",
+    "A3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala blues de Lá limpo e no tempo.",
+  "prerequisites": [
+    "blues_e_001",
+    "pentatonic_a_minor_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "passar direto do Ré ao Mi",
+    "blue note desafinada"
+  ],
+  "hints": [
+    "Ré# na casa 1 da corda Ré",
+    "a blue note é passagem: não pare nela"
+  ],
+  "progression": {
+    "easier": "blues_a_001 a 60 BPM",
+    "harder": "blues_a_001 a 120 BPM"
+  }
+}

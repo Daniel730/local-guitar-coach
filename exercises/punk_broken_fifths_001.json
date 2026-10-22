@@ -1,0 +1,50 @@
+{
+  "id": "punk_broken_fifths_001",
+  "name": "Punk: power chord partido",
+  "description": "Tônica e quinta de E5, A5 e B5 tocadas uma de cada vez: E5 e A5 com a tônica solta, B5 na casa 2 da corda Lá.",
+  "skill": "punk",
+  "subskill": "broken_power_chords",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "E2",
+    "B2",
+    "A2",
+    "E3",
+    "B2",
+    "F#3",
+    "A2",
+    "E3"
+  ],
+  "start_bpm": 50,
+  "target_bpm": 90,
+  "subdivision": "eighth",
+  "objective": "Tocar Punk: power chord partido limpo e no tempo.",
+  "prerequisites": [
+    "punk_roots_i_iv_v_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "mudar a forma da mão entre acordes",
+    "tocar a quinta na corda errada"
+  ],
+  "hints": [
+    "a quinta fica sempre duas casas acima, na corda de baixo",
+    "no B5: indicador na casa 2, anelar na casa 4"
+  ],
+  "progression": {
+    "easier": "punk_broken_fifths_001 a 50 BPM",
+    "harder": "punk_broken_fifths_001 a 110 BPM"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "scale_e_minor_natural_001",
+  "name": "Escala de Mi menor natural",
+  "description": "Mi menor natural em primeira posição, uma oitava a partir do Mi grave.",
+  "skill": "scales",
+  "subskill": "natural_minor",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "E2",
+    "F#2",
+    "G2",
+    "A2",
+    "B2",
+    "C3",
+    "D3",
+    "E3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala de Mi menor natural limpo e no tempo.",
+  "prerequisites": [
+    "scale_a_minor_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "tocar Fá natural em vez de Fá#",
+    "esquecer o Dó na corda Lá"
+  ],
+  "hints": [
+    "Fá# na casa 2 da corda Mi",
+    "é a escala de Sol maior a partir do Mi"
+  ],
+  "progression": {
+    "easier": "scale_e_minor_natural_001 a 60 BPM",
+    "harder": "scale_e_minor_natural_001 a 120 BPM"
+  }
+}
