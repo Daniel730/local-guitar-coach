@@ -427,6 +427,8 @@
                 break;
             case "error":
                 log(`ERROR: ${data.message}`);
+                teacherFeedbackEl.textContent = data.message;
+                if (sessionActive) stopSession();   // capture never started: release the session
                 bumpEvent();
                 break;
             default: break;
@@ -454,10 +456,15 @@
     async function loadDevices() {
         try {
             const devs = await fetch('/api/devices').then(r => r.json());
-            if (!devs.length) return;
+            if (!devs.length) {
+                selectedDevice = null;
+                teacherFeedbackEl.textContent = 'Nenhuma entrada de áudio encontrada. Ligue a M-Track e tente de novo.';
+                return;
+            }
             // Prefer the M-Track/M-Audio interface (the target hardware), else most channels.
-            let choose = devs.find(d => /M-?Track|M-Audio/i.test(d.name || ''))
-                || devs.reduce((a, b) => (b.channels > a.channels ? b : a), devs[0]);
+            const mtrack = devs.find(d => /M-?Track|M-Audio/i.test(d.name || ''));
+            let choose = mtrack || devs.reduce((a, b) => (b.channels > a.channels ? b : a), devs[0]);
+            if (!mtrack) teacherFeedbackEl.textContent = `M-Track não encontrada: vou ouvir por "${choose.name}". Ligue a M-Track e tente de novo.`;
             selectedDevice = choose.index;
             selectedDeviceChannels = choose.channels || 0;
             // Derive the channel from the device's channel count (P1-A: no blind default).
@@ -711,8 +718,10 @@
 
     // ---- controls ----
     exerciseSelect.addEventListener('change', selectExercise);
-    btnStart.addEventListener('click', () => {
+    btnStart.addEventListener('click', async () => {
         if (!ws || ws.readyState !== WebSocket.OPEN || countingIn || sessionActive) return;
+        await loadDevices();   // the interface may have been (re)plugged since page load: indices change
+        if (selectedDevice === null || countingIn || sessionActive) return;
         runCountIn(startSession);
     });
     btnStop.addEventListener('click', stopSession);

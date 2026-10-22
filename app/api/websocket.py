@@ -106,7 +106,9 @@ class WebSocketHandler:
                              "ch2": channels_dbfs[1] if len(channels_dbfs) > 1 else None})
         except Exception as e:
             logger.exception("Capture start failed")
-            await _send({"type": "error", "message": f"Capture failed: {e}"})
+            await _send({"type": "error",
+                         "message": f"Não consegui abrir a entrada de áudio ({e}). "
+                                    "Confira se a M-Track está ligada e tente de novo."})
 
         # Teacher task
         task = asyncio.create_task(self._teacher_loop(session_id))
