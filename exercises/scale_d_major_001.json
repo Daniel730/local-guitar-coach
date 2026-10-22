@@ -1,0 +1,50 @@
+{
+  "id": "scale_d_major_001",
+  "name": "Escala de Ré maior",
+  "description": "Ré maior em primeira posição, da corda Ré solta ao Ré da corda Si.",
+  "skill": "scales",
+  "subskill": "major_scale",
+  "technique": "alternate_picking",
+  "difficulty": 3,
+  "target_notes": [
+    "D3",
+    "E3",
+    "F#3",
+    "G3",
+    "A3",
+    "B3",
+    "C#4",
+    "D4"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala de Ré maior limpo e no tempo.",
+  "prerequisites": [
+    "scale_g_major_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "tocar Dó natural em vez de Dó#",
+    "Fá natural por hábito"
+  ],
+  "hints": [
+    "dois sustenidos: Fá# e Dó#",
+    "Dó# na casa 2 da corda Si"
+  ],
+  "progression": {
+    "easier": "scale_d_major_001 a 60 BPM",
+    "harder": "scale_d_major_001 a 120 BPM"
+  }
+}

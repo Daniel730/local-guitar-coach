@@ -1,0 +1,50 @@
+{
+  "id": "scale_c_major_desc_001",
+  "name": "Escala de Dó maior descendo",
+  "description": "Dó maior em primeira posição, do Dó agudo ao grave.",
+  "skill": "scales",
+  "subskill": "major_scale",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "C4",
+    "B3",
+    "A3",
+    "G3",
+    "F3",
+    "E3",
+    "D3",
+    "C3"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Escala de Dó maior descendo limpo e no tempo.",
+  "prerequisites": [
+    "scale_c_major_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "esquecer o Fá na corda Ré",
+    "acelerar no fim"
+  ],
+  "hints": [
+    "mesmos dedos da subida, ao contrário",
+    "olhe a próxima corda antes de chegar"
+  ],
+  "progression": {
+    "easier": "scale_c_major_desc_001 a 60 BPM",
+    "harder": "scale_c_major_desc_001 a 120 BPM"
+  }
+}

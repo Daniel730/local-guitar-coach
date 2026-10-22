@@ -40,3 +40,11 @@ def test_api_shows_full_song_melody():
     from app.main import app
     e = TestClient(app).get("/api/exercises/song_twinkle_a").json()
     assert e["target_notes"][:2] == ["C3", "C3"]
+
+
+@pytest.mark.parametrize("ex", EXERCISES, ids=lambda e: e.id)
+def test_no_unscored_repeats(ex):
+    # The EventTracker merges a re-struck identical note: back-to-back repeats are only
+    # scorable when the exercise collapses them (songs).
+    seq = ex.expected_sequence
+    assert all(a != b for a, b in zip(seq, seq[1:])), seq

@@ -1,0 +1,51 @@
+{
+  "id": "pentatonic_a_minor_001",
+  "name": "Pentatônica de Lá menor",
+  "description": "Lá menor pentatônica em primeira posição, do Lá grave ao Mi agudo.",
+  "skill": "pentatonic",
+  "subskill": "minor_pentatonic",
+  "technique": "alternate_picking",
+  "difficulty": 2,
+  "target_notes": [
+    "A2",
+    "C3",
+    "D3",
+    "E3",
+    "G3",
+    "A3",
+    "C4",
+    "D4",
+    "E4"
+  ],
+  "start_bpm": 60,
+  "target_bpm": 100,
+  "subdivision": "quarter",
+  "objective": "Tocar Pentatônica de Lá menor limpo e no tempo.",
+  "prerequisites": [
+    "pentatonic_e_minor_2oct_001"
+  ],
+  "evaluation": {
+    "note_accuracy": true,
+    "timing_accuracy": true,
+    "consistency": true
+  },
+  "success_criteria": {
+    "min_note_accuracy": 0.9,
+    "min_timing_accuracy": 0.8
+  },
+  "failure_criteria": {
+    "max_note_accuracy": 0.5
+  },
+  "common_mistakes": [
+    "confundir com a pentatônica de Mi",
+    "pular o Dó na corda Si"
+  ],
+  "hints": [
+    "é a mesma digitação da de Mi, começando na corda Lá",
+    "cordas soltas: Lá, Ré, Sol e Mi"
+  ],
+  "progression": {
+    "easier": "pentatonic_a_minor_001 a 60 BPM",
+    "harder": "pentatonic_a_minor_001 a 120 BPM"
+  }
+}
