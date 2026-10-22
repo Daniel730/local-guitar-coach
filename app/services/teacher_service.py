@@ -28,7 +28,7 @@ class TeacherService:
     def __init__(
         self,
         exercise_id: str,
-        ollama_model: str = "llama3.1:8b",
+        ollama_model: str = "qwen2.5:7b",
         fail_ollama: bool = False,
         attempt_silence_s: float = 2.5,
     ) -> None:

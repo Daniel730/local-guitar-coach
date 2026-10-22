@@ -66,7 +66,7 @@ class OllamaProvider(LLMProvider):
     # Ollama can be slow on cold start (model load). 60s avoids false fallback.
     DEFAULT_TIMEOUT_S = 60.0
 
-    def __init__(self, model: str = "llama3.1:8b", host: Optional[str] = None,
+    def __init__(self, model: str = "qwen2.5:7b", host: Optional[str] = None,
                  think: Optional[str] = None) -> None:
         self.model = model
         self.host = host or self.DEFAULT_HOST

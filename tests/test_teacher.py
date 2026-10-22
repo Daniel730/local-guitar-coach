@@ -136,6 +136,13 @@ def test_schema_requires_action():
     assert "missing required" in err
 
 
+def test_schema_unwraps_markdown_fence_only():
+    ok, data, _ = validate_action('```json\n{"action": "REPEAT"}\n```')
+    assert ok and data["action"] == "REPEAT"
+    ok, _, err = validate_action('```json\n{"action": "REPEAT", "hack": 1}\n```')
+    assert not ok and "unknown field" in err
+
+
 # ---------- CONTEXTUAL CONVERSATION ----------
 def test_conversation_resolves_current():
     # "Isso está certo?" with no real LLM -> fallback still safe.
