@@ -26,6 +26,7 @@
     let wsConnected = false;
     let countingIn = false;
     let exerciseMeta = {};       // id -> {name, start_bpm, target_bpm}
+    let progressData = { by_exercise: {}, skill_names: {} };   // last /api/progress
     let teacherTempo = null;     // latest teacher tempo (overrides exercise BPM)
     let pendingNextExercise = null;
 
@@ -40,6 +41,7 @@
     const progressionEl = document.getElementById('progression');
     const skillListEl = document.getElementById('skill-list');
     const recentSessionsEl = document.getElementById('recent-sessions');
+    const exerciseHistoryEl = document.getElementById('exercise-history');
     const neckEl = document.getElementById('neck');
     const neckHintEl = document.getElementById('neck-hint');
     const pitchNoteEl = document.getElementById('pitch-note');
@@ -150,9 +152,11 @@
             exerciseSelect.innerHTML = '<option value="">Escolha um exercício</option>';
             if (exerciseListEl) exerciseListEl.innerHTML = '';
             exerciseMeta = {};
-            // Songs get their own group in the select and the exercises view.
-            const groups = [['Exercícios', ex.filter(e => e.skill !== 'songs')],
-                            ['Músicas', ex.filter(e => e.skill === 'songs')]];
+            // One group per skill (catalog order), songs last.
+            const skillOf = e => e.skill || 'outros';
+            const skillIds = [...new Set(ex.map(skillOf))].sort((a, b) => (a === 'songs') - (b === 'songs'));
+            const groups = skillIds.map(s => [s === 'songs' ? 'Músicas' : (progressData.skill_names[s] || s),
+                                              ex.filter(e => skillOf(e) === s)]);
             groups.forEach(([label, items]) => {
                 if (!items.length) return;
                 const og = document.createElement('optgroup');
@@ -173,11 +177,13 @@
                     if (exerciseListEl) {
                         const item = document.createElement('div');
                         item.className = 'exercise-item';
+                        item.dataset.id = e.id;
                         const notes = (e.target_notes || []).join(' ');
                         item.innerHTML = `<div><div class="ex-name"></div>
                             <div class="ex-meta ex-desc"></div>
                             <div class="ex-meta">${notes}</div></div>
-                            <div class="ex-meta">${e.target_bpm ?? '—'} BPM · dificuldade ${e.difficulty ?? 1}</div>`;
+                            <div class="ex-side"><div class="ex-meta">${e.target_bpm ?? '—'} BPM · dificuldade ${e.difficulty ?? 1}</div>
+                            <div class="ex-status"></div></div>`;
                         item.querySelector('.ex-name').textContent = e.name;
                         item.querySelector('.ex-desc').textContent = e.description || '';
                         item.style.cursor = 'pointer';
@@ -190,6 +196,7 @@
                     }
                 });
             });
+            renderCatalogStatus();
             if (!ex.length && exerciseListEl) {
                 exerciseListEl.innerHTML = '<p class="muted">Nenhum exercício encontrado.</p>';
             }
@@ -225,37 +232,91 @@
         loadProgress();
     }
 
+    const TAB_STRINGS = ['e', 'B', 'G', 'D', 'A', 'E'];   // tab rows, high string on top
     function renderNotePills() {
         progressionEl.innerHTML = '';
         if (!taskNotes.length) {
             progressionEl.innerHTML = '<span class="empty-state">Selecione um exercício para começar.</span>';
             return;
         }
+        // Tablature: one column per note, fret number on its string (position from neck.js).
+        const head = document.createElement('div');
+        head.className = 'tab-col tab-head';
+        head.innerHTML = '<span class="tab-note"></span>' + TAB_STRINGS.map(s => `<span>${s}</span>`).join('');
+        progressionEl.appendChild(head);
         taskNotes.forEach((n, i) => {
-            const pill = document.createElement('span');
-            pill.textContent = n;
-            pill.classList.add('note-pill');
-            pill.dataset.index = i;
-            if (i === playedIndex) pill.classList.add('current');
-            progressionEl.appendChild(pill);
+            const p = window.Neck ? window.Neck.positionFor(n) : null;
+            const col = document.createElement('div');
+            col.className = 'tab-col';
+            col.dataset.index = i;
+            col.innerHTML = '<span class="tab-note"></span>'
+                + TAB_STRINGS.map((_, row) => `<span>${p && 5 - p.string === row ? p.fret : ''}</span>`).join('');
+            col.querySelector('.tab-note').textContent = n;
+            progressionEl.appendChild(col);
         });
         updatePills();
     }
     function updatePills() {
         progressionEl.querySelectorAll('[data-index]').forEach(p => {
-            p.classList.toggle('current', parseInt(p.dataset.index) === playedIndex);
+            const cur = parseInt(p.dataset.index) === playedIndex;
+            p.classList.toggle('current', cur);
+            if (cur) progressionEl.scrollLeft = p.offsetLeft - progressionEl.clientWidth / 2;   // long songs scroll
         });
     }
 
     async function loadProgress() {
         try {
             const p = await fetch('/api/progress').then(r => r.json());
+            progressData = { by_exercise: p.by_exercise || {}, skill_names: p.skill_names || {} };
             renderSkills(p.skills || {});
+            renderByExercise(progressData.by_exercise, p.exercises || {});
+            renderCatalogStatus();
             renderRecent(p.recent || [], p.exercises || {});
         } catch (e) { log(`Progress failed: ${e}`); }
     }
 
     function average(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+    const pct = v => v == null ? '—' : Math.round(v * 100) + '%';
+
+    function renderCatalogStatus() {
+        if (!exerciseListEl) return;
+        exerciseListEl.querySelectorAll('.exercise-item').forEach(item => {
+            const s = progressData.by_exercise[item.dataset.id];
+            const el = item.querySelector('.ex-status');
+            const last = s && s.history[s.history.length - 1];
+            el.classList.toggle('mastered', !!(s && s.mastered));
+            el.textContent = !s ? 'Novo' : s.mastered ? 'Dominado'
+                : `${s.attempts} tentativa${s.attempts > 1 ? 's' : ''} · último ${pct(last.note_accuracy)}`;
+        });
+    }
+
+    function sparkline(vals) {
+        const w = 120, h = 28;
+        const pts = vals.map((v, i) => [vals.length > 1 ? i * w / (vals.length - 1) : w / 2, h - 3 - (v ?? 0) * (h - 6)]);
+        const [lx, ly] = pts[pts.length - 1];
+        return `<svg class="spark" viewBox="-3 0 ${w + 6} ${h}" width="${w}" height="${h}" aria-hidden="true">`
+            + `<polyline points="${pts.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ')}"/>`
+            + `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3"/></svg>`;
+    }
+
+    function renderByExercise(by, exercises) {
+        if (!exerciseHistoryEl) return;
+        const ids = Object.keys(by);
+        if (!ids.length) { exerciseHistoryEl.textContent = 'Nenhuma tentativa ainda.'; return; }
+        exerciseHistoryEl.innerHTML = '';
+        ids.forEach(id => {
+            const s = by[id], last = s.history[s.history.length - 1];
+            const bpm = last.performed_bpm != null ? Math.round(last.performed_bpm) : '—';
+            const row = document.createElement('div');
+            row.className = 'history-row';
+            row.innerHTML = `<div class="history-main"><div class="ex-name"></div>
+                <div class="ex-meta">${s.attempts} tentativas · notas ${pct(last.note_accuracy)} · ritmo ${pct(last.timing_accuracy)} · ${bpm} BPM</div></div>
+                ${sparkline(s.history.map(a => a.note_accuracy))}
+                <span class="ex-status${s.mastered ? ' mastered' : ''}">${s.mastered ? 'Dominado' : 'Em prática'}</span>`;
+            row.querySelector('.ex-name').textContent = exercises[id] ? exercises[id].name : id;
+            exerciseHistoryEl.appendChild(row);
+        });
+    }
 
     function renderSkills(skills) {
         if (!skillListEl) return;
@@ -762,8 +823,7 @@
     syncMetronomeUI();
     updateMetronomeBpm();
     connect();
-    loadExercises();
     loadDevices();
-    loadProgress();
+    loadProgress().finally(loadExercises);   // catalog groups need skill names from /api/progress
     showView('coach');
 })();

@@ -61,10 +61,25 @@ async def list_devices() -> List[DeviceInfo]:
 
 @router.get("/progress")
 async def progress():
-    """Per-skill progression + the 20 most recent performances from data/sessions/."""
+    """Per-skill progression, per-exercise attempt history, and the 20 most recent performances."""
+    from exercises import curriculum
+    from exercises.skills import KNOWN_SKILLS
     sessions_dir = Path("data") / "sessions"
+    all_ex = curriculum_exercises()
     exercises = {ex.id: {"name": ex.name, "skill": ex.skill, "target_notes": ex.expected_sequence}
-                 for ex in curriculum_exercises()}
+                 for ex in all_ex}
+    attempts = curriculum.load_attempts(sessions_dir)
+    by_exercise = {}
+    for ex in all_ex:
+        mine = [a for a in attempts if a.get("exercise_id") == ex.id]
+        if mine:
+            by_exercise[ex.id] = {
+                "attempts": len(mine),
+                "mastered": curriculum.is_mastered(ex, attempts),
+                "history": [{k: a.get(k) for k in ("note_accuracy", "timing_accuracy", "performed_bpm")}
+                            for a in mine[-10:]],
+            }
+    skill_names = {k: s.name for k, s in KNOWN_SKILLS.items()}
     recent, skills = [], {}
     if sessions_dir.exists():
         files = sorted((f for f in sessions_dir.glob("*.json") if not f.name.startswith("skill_")),
@@ -80,7 +95,8 @@ async def progress():
                 skills[d["skill"]] = d
             except Exception:
                 continue
-    return {"exercises": exercises, "recent": recent, "skills": skills}
+    return {"exercises": exercises, "recent": recent, "skills": skills,
+            "by_exercise": by_exercise, "skill_names": skill_names}
 
 
 @router.get("/next")

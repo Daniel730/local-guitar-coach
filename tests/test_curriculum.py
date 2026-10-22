@@ -147,3 +147,16 @@ def test_api_next_http(api_env):
     assert r.status_code == 200
     assert r.json()["next_exercise_id"] == "a_one"
     assert client.get("/api/next", params={"current": "nope"}).status_code == 404
+
+
+def test_api_progress_by_exercise(api_env):
+    from app.api.routes import progress
+    assert asyncio.run(progress())["by_exercise"] == {}
+    for i in range(2):
+        record_attempt(_att("a_one", **GOOD), api_env)
+    p = asyncio.run(progress())
+    a = p["by_exercise"]["a_one"]
+    assert a["attempts"] == 2 and a["mastered"] is True and len(a["history"]) == 2
+    assert set(a["history"][0]) == {"note_accuracy", "timing_accuracy", "performed_bpm"}
+    assert "b_two" not in p["by_exercise"]
+    assert p["skill_names"]["pentatonic"]
