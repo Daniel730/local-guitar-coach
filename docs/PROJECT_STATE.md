@@ -333,6 +333,10 @@ ao LiteLLM permitida (o runtime continua só-Ollama).
 **Pendente (precisa do Dan + guitarra):** gate 5 (tocar `scale_e_minor_001` e uma frase de música
 via CH2) e gate 7 (registrar em `validation/session_007/`). Roteiro em `docs/MANUAL_TEST.md` §v1.
 
+**Decisão do dono (2026-10-22):** v1 entra em `master` com gates 5 e 7 **PENDENTES** (Dan sem poder
+tocar por 3-6 semanas). MVP-6 continua 🟡, não DONE. Percepção congelada até o teste físico.
+Próximas frentes, nesta ordem: robustez do arranque → UX → conteúdo → professor (modelo < 3 s).
+
 ---
 
 *Contrato canônico. Atualizar por decisão explícita do dono, não por
